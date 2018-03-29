@@ -109,10 +109,10 @@ int find_subcache(const char *path_subcache, const char *hash_back){
         fclose(fp);
 
         free(path_fullcache);
-        return EXIT_SUCCESS;
+        return EXIT_FAILURE;
     }else{              // for HIT case
         // TODO
-        return EXIT_FAILURE;
+        return EXIT_SUCCESS;
     }
 }
 
