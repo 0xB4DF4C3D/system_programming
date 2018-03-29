@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+  <html>
+    <head>
+      <title>thu_2016722092</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      
+      <link rel="stylesheet" href="file:///C:\Users\chemi\.atom\packages\markdown-preview-enhanced\node_modules\@shd101wyy\mume\dependencies\katex\katex.min.css">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+
+      <style> 
+      /**
+ * prism.js Github theme based on GitHub's theme.
+ * @author Sam Clarke
+ */
+code[class*="language-"],
+pre[class*="language-"] {
+  color: #333;
+  background: none;
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.4;
+
+  -moz-tab-size: 8;
+  -o-tab-size: 8;
+  tab-size: 8;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+  padding: .8em;
+  overflow: auto;
+  /* border: 1px solid #ddd; */
+  border-radius: 3px;
+  /* background: #fff; */
+  background: #f5f5f5;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+  padding: .1em;
+  border-radius: .3em;
+  white-space: normal;
+  background: #f5f5f5;
+}
+
+.token.comment,
+.token.blockquote {
+  color: #969896;
+}
+
+.token.cdata {
+  color: #183691;
+}
+
+.token.doctype,
+.token.punctuation,
+.token.variable,
+.token.macro.property {
+  color: #333;
+}
+
+.token.operator,
+.token.important,
+.token.keyword,
+.token.rule,
+.token.builtin {
+  color: #a71d5d;
+}
+
+.token.string,
+.token.url,
+.token.regex,
+.token.attr-value {
+  color: #183691;
+}
+
+.token.property,
+.token.number,
+.token.boolean,
+.token.entity,
+.token.atrule,
+.token.constant,
+.token.symbol,
+.token.command,
+.token.code {
+  color: #0086b3;
+}
+
+.token.tag,
+.token.selector,
+.token.prolog {
+  color: #63a35c;
+}
+
+.token.function,
+.token.namespace,
+.token.pseudo-element,
+.token.class,
+.token.class-name,
+.token.pseudo-class,
+.token.id,
+.token.url-reference .token.variable,
+.token.attr-name {
+  color: #795da3;
+}
+
+.token.entity {
+  cursor: help;
+}
+
+.token.title,
+.token.title .token.punctuation {
+  font-weight: bold;
+  color: #1d3e81;
+}
+
+.token.list {
+  color: #ed6a43;
+}
+
+.token.inserted {
+  background-color: #eaffea;
+  color: #55a532;
+}
+
+.token.deleted {
+  background-color: #ffecec;
+  color: #bd2c00;
+}
+
+.token.bold {
+  font-weight: bold;
+}
+
+.token.italic {
+  font-style: italic;
+}
+
+
+/* JSON */
+.language-json .token.property {
+  color: #183691;
+}
+
+.language-markup .token.tag .token.punctuation {
+  color: #333;
+}
+
+/* CSS */
+code.language-css,
+.language-css .token.function {
+  color: #0086b3;
+}
+
+/* YAML */
+.language-yaml .token.atrule {
+  color: #63a35c;
+}
+
+code.language-yaml {
+  color: #183691;
+}
+
+/* Ruby */
+.language-ruby .token.function {
+  color: #333;
+}
+
+/* Markdown */
+.language-markdown .token.url {
+  color: #795da3;
+}
+
+/* Makefile */
+.language-makefile .token.symbol {
+  color: #795da3;
+}
+
+.language-makefile .token.variable {
+  color: #183691;
+}
+
+.language-makefile .token.builtin {
+  color: #0086b3;
+}
+
+/* Bash */
+.language-bash .token.keyword {
+  color: #0086b3;
+}html body{font-family:"Helvetica Neue",Helvetica,"Segoe UI",Arial,freesans,sans-serif;font-size:16px;line-height:1.6;color:#333;background-color:#fff;overflow:initial;box-sizing:border-box;word-wrap:break-word}html body>:first-child{margin-top:0}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{line-height:1.2;margin-top:1em;margin-bottom:16px;color:#000}html body h1{font-size:2.25em;font-weight:300;padding-bottom:.3em}html body h2{font-size:1.75em;font-weight:400;padding-bottom:.3em}html body h3{font-size:1.5em;font-weight:500}html body h4{font-size:1.25em;font-weight:600}html body h5{font-size:1.1em;font-weight:600}html body h6{font-size:1em;font-weight:600}html body h1,html body h2,html body h3,html body h4,html body h5{font-weight:600}html body h5{font-size:1em}html body h6{color:#5c5c5c}html body strong{color:#000}html body del{color:#5c5c5c}html body a:not([href]){color:inherit;text-decoration:none}html body a{color:#08c;text-decoration:none}html body a:hover{color:#00a3f5;text-decoration:none}html body img{max-width:100%}html body>p{margin-top:0;margin-bottom:16px;word-wrap:break-word}html body>ul,html body>ol{margin-bottom:16px}html body ul,html body ol{padding-left:2em}html body ul.no-list,html body ol.no-list{padding:0;list-style-type:none}html body ul ul,html body ul ol,html body ol ol,html body ol ul{margin-top:0;margin-bottom:0}html body li{margin-bottom:0}html body li.task-list-item{list-style:none}html body li>p{margin-top:0;margin-bottom:0}html body .task-list-item-checkbox{margin:0 .2em .25em -1.8em;vertical-align:middle}html body .task-list-item-checkbox:hover{cursor:pointer}html body blockquote{margin:16px 0;font-size:inherit;padding:0 15px;color:#5c5c5c;border-left:4px solid #d6d6d6}html body blockquote>:first-child{margin-top:0}html body blockquote>:last-child{margin-bottom:0}html body hr{height:4px;margin:32px 0;background-color:#d6d6d6;border:0 none}html body table{margin:10px 0 15px 0;border-collapse:collapse;border-spacing:0;display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}html body table th{font-weight:bold;color:#000}html body table td,html body table th{border:1px solid #d6d6d6;padding:6px 13px}html body dl{padding:0}html body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:bold}html body dl dd{padding:0 16px;margin-bottom:16px}html body code{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;font-size:.85em !important;color:#000;background-color:#f0f0f0;border-radius:3px;padding:.2em 0}html body code::before,html body code::after{letter-spacing:-0.2em;content:"\00a0"}html body pre>code{padding:0;margin:0;font-size:.85em !important;word-break:normal;white-space:pre;background:transparent;border:0}html body .highlight{margin-bottom:16px}html body .highlight pre,html body pre{padding:1em;overflow:auto;font-size:.85em !important;line-height:1.45;border:#d6d6d6;border-radius:3px}html body .highlight pre{margin-bottom:0;word-break:normal}html body pre code,html body pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}html body pre code:before,html body pre tt:before,html body pre code:after,html body pre tt:after{content:normal}html body p,html body blockquote,html body ul,html body ol,html body dl,html body pre{margin-top:0;margin-bottom:16px}html body kbd{color:#000;border:1px solid #d6d6d6;border-bottom:2px solid #c7c7c7;padding:2px 4px;background-color:#f0f0f0;border-radius:3px}@media print{html body{background-color:#fff}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{color:#000;page-break-after:avoid}html body blockquote{color:#5c5c5c}html body pre{page-break-inside:avoid}html body table{display:table}html body img{display:block;max-width:100%;max-height:100%}html body pre,html body code{word-wrap:break-word;white-space:pre}}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview .pagebreak,.markdown-preview .newpage{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center !important}.markdown-preview:not([for="preview"]) .code-chunk .btn-group{display:none}.markdown-preview:not([for="preview"]) .code-chunk .status{display:none}.markdown-preview:not([for="preview"]) .code-chunk .output-div{margin-bottom:16px}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,0.66);border:4px solid rgba(150,150,150,0.66);background-clip:content-box}html body[for="html-export"]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0}@media screen and (min-width:914px){html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px)}}@media screen and (max-width:914px){html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{font-size:14px !important;padding:1em}}@media print{html body[for="html-export"]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for="html-export"]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,0.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,0.66);border:4px solid rgba(150,150,150,0.66);background-clip:content-box}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc ul{padding:0 1.6em;margin-top:.8em}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc li{margin-bottom:.8em}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc ul{list-style-type:none}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% -  300px);padding:2em calc(50% - 457px -  150px);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for="html-export"]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for="html-export"]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}
+/* Please visit the URL below for more information: */
+/*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
+ 
+      </style>
+    </head>
+    <body for="html-export">
+      <div class="mume markdown-preview   ">
+      <h1 class="mume-header" id="1%EC%B0%A8-%EA%B3%BC%EC%A0%9C-%EB%A6%AC%EB%88%85%EC%8A%A4-%EA%B8%B0%EC%B4%88">1차 과제 - 리눅스 기초</h1>
+
+<pre data-role="codeBlock" data-info="" class="language-"><code>&#xD559;    &#xACFC; : &#xCEF4;&#xD4E8;&#xD130; &#xACF5;&#xD559;&#xACFC;
+&#xB2F4;&#xB2F9;&#xAD50;&#xC218; : &#xD669;&#xD638;&#xC601;
+&#xBD84;    &#xBC18; : &#xBAA9;34
+&#xD559;    &#xBC88; : 2016722092
+&#xC131;    &#xBA85; : &#xC815;&#xB3D9;&#xD638;
+</code></pre><hr>
+<h1 class="mume-header" id="%EB%AA%A9%EC%B0%A8">목차</h1>
+
+<ol>
+<li>Ubuntu Installation</li>
+<li>Usage of Linux Commands</li>
+</ol>
+<hr>
+<h1 class="mume-header" id="ubuntu-installation">Ubuntu Installation</h1>
+
+<h2 class="mume-header" id="introduction">Introduction</h2>
+
+<p>리눅스 기초를 다지기 위해 Ubuntu 설치부터 시작한다. 그리고 설치 과정을 캡쳐하고 설명한다.</p>
+<h2 class="mume-header" id="result">Result</h2>
+
+<p>기존에 이미 Ubuntu 16.04.03 가상 호스트가 있었지만 과제 수행을 위해 다시 설치하였다.<br>
+하드웨어 설정은 다음과 같다:</p>
+<figure>
+<img src="thu_2016722092_&#xC815;&#xB3D9;&#xD638;.assets/setting.png">
+    <figcaption>그림 1-1. 하드웨어 설정</figcaption>
+</figure>
+<p>다음은 설치 과정 중 언어 팩을 다운로드 하는 장면이다:</p>
+<figure>
+<img src="thu_2016722092_&#xC815;&#xB3D9;&#xD638;.assets/install_language.png">
+    <figcaption>그림 1-2. 언어 팩 다운로드</figcaption>
+</figure>
+<p>다음과 같이 깔끔한 초기 화면을 볼 수 있었다:</p>
+<figure>
+<img src="thu_2016722092_&#xC815;&#xB3D9;&#xD638;.assets/initial.png">
+    <figcaption>그림 1-3. 초기 화면</figcaption>
+</figure>
+<h2 class="mume-header" id="reference">Reference</h2>
+
+<p><a href="https://www.ubuntu.com/download/desktop">https://www.ubuntu.com/download/desktop</a> — Ubuntu 16.04.4 LTS (Xenial Xerus) 이미지 제공</p>
+<hr>
+<h1 class="mume-header" id="usage-of-linux-commands">Usage of Linux Commands</h1>
+
+<h2 class="mume-header" id="introduction-1">Introduction</h2>
+
+<p>우분투를 설치하고 난 후 리눅스의 기본적인 명령어들은 어떤 것들이 있는 지 알아보고 직접 터미널에서 따라 쳐 보면서 다양한 명령어와 옵션들을 실습한다. 실습에서 사용할 명령어들은 다음과 같다:</p>
+<ul>
+<li>2주차 : <code>man</code>, <code>cat</code>, <code>pwd</code>, <code>cd</code>, <code>ls</code>, <code>chmod</code>, <code>mkdir</code>, <code>rmdir</code>, <code>rm</code>, <code>cp</code>, <code>mv</code>, <code>ln</code>, <code>touch</code>, <code>exit</code>, <code>kill</code>, <code>ps</code>, <code>pstree</code>, <code>time</code>, <code>passwd</code>, <code>uname</code>, <code>wc</code>, <code>more</code>, <code>echo</code>, <code>alias</code>, <code>find</code>, <code>grep</code></li>
+<li>3주차 : <code>vi</code>, <code>make</code>, <code>gdb</code></li>
+</ul>
+<h2 class="mume-header" id="result-1">Result</h2>
+
+<h3 class="mume-header" id="2%EC%A3%BC%EC%B0%A8">2주차</h3>
+
+<p>![man wall](thu_2016722092_정동호.assets/man wall.png)</p>
+<ol>
+<li>
+<p><code>man</code></p>
+<figure>
+<figcaption>그림 2-1-1. man wall</figcaption>
+</figure>
+<figure>![man -k copy](thu_2016722092_정동호.assets\man -k copy.png)
+<figcaption>그림 2-1-2. man -k copy</figcaption>
+</figure>
+<figure>![man -a write](thu_2016722092_정동호.assets\man -a write.png)
+<figcaption>그림 2-1-3. man -a write</figcaption>
+</figure>
+<p>**<u>man</u>**ual, 먼저 <em>man [OPTION...][SECTION] PAGE...</em> 에서 옵션 없이 <code>wall</code>을 인자로 주었을 때는 <code>wall</code>에 대한 설명이 나타나는 것을 볼 수 있었다.<br>
+그리고 -k 옵션을 주고서 <code>copy</code>를 인자로 주었을때는 <code>copy</code>가 포함된 모든 페이지들의 리스트가 반환되었다.<br>
+마지막으로 <code>man</code>에는 여러 섹션이 있고, 동일한 이름의 페이지가 존재할 수 있는데 _[SECTION]_을 명시하지 않고 a 옵션을 준다면 그림 2-1-3과 같이 한 페이지의 조회가 끝나면 다른 페이지도 조회할 것인지 선택할 수 있다는 것을 볼 수 있었다.</p>
+<p><code>man</code>의 섹션은 일반적으로 다음과 같이 8가지로 나뉜다:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">섹션</th>
+<th style="text-align:center">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center">일반적인 명령어</td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:center">시스템 콜</td>
+</tr>
+<tr>
+<td style="text-align:center">3</td>
+<td style="text-align:center">라이브러리 함수—특히 C 표준 라이브러리의</td>
+</tr>
+<tr>
+<td style="text-align:center">4</td>
+<td style="text-align:center">특수 파일(보통 /dev에서 볼 수 있는 장치)과 드라이버</td>
+</tr>
+<tr>
+<td style="text-align:center">5</td>
+<td style="text-align:center">파일포맷 및 규약</td>
+</tr>
+<tr>
+<td style="text-align:center">6</td>
+<td style="text-align:center">게임 및 화면보호기</td>
+</tr>
+<tr>
+<td style="text-align:center">7</td>
+<td style="text-align:center">잡다한 것들</td>
+</tr>
+<tr>
+<td style="text-align:center">8</td>
+<td style="text-align:center">시스템 관리 명령어 및 대몬</td>
+</tr>
+</tbody>
+</table>
+<p>모든 <code>man</code> page들은 일관성과 간결함을 위해 공통된 양식을 따르고 있다. 이 양식을 통해 페이지들은 가능한한 하이라이팅이나 폰트제어 없이 ASCII만으로 출력하는데 최적화 되고 있다. 양식은 다음과 같다:</p>
+<ul>
+<li><strong>NAME</strong> :  명령어 또는 함수의 이름, 뒤이어 무엇을 하는지 한줄 짜리 설명이 나온다.</li>
+<li><strong>SYNOPSIS</strong> : 명령어의 경우 어떻게 실행시키는지에 대한 설명을 출력하고, 프로그램 함수의 경우 함수가 취하는 인자들과 해당 함수를 정의한 헤더 파일들에 대한 목록을 나열한다.</li>
+<li><strong>DESCRIPTION</strong> : 명령어 또는 함수의 기능에 대한 설명</li>
+<li><strong>EXAMPLES</strong> : 일반적인 용례</li>
+<li><strong>SEE ALSO</strong> : 관련된 명령어나 함수</li>
+</ul>
+<p>물론 위의 절뿐만 아니라 OPTIONS, EXIT STATUS, ENVIRONMENT, ... 등도 포함할 수 있다.</p>
+<p>​</p>
+</li>
+<li>
+<p><code>cat</code></p>
+<figure>![cat](thu_2016722092_정동호.assets\cat.png)
+<figcaption>그림 2-2. cat</figcaption>
+</figure>
+<p>con**<u>cat</u>**enate, 사용법은 <em>cat [OPTION] [FILE]...</em> 이다. 파일들을 잇고(concatenate) 표준 출력으로 내보낸다. 즉 파일의 내용을 출력하는 명령어이며 리다이렉션 <code>&gt;</code>을 사용해 결과를 파일이나 다른 곳으로 내보낼 수 있다.</p>
+<p>​</p>
+</li>
+<li>
+<p><code>pwd</code></p>
+<figure>![pwd](thu_2016722092_정동호.assets\pwd.png)
+<figcaption>그림 2-3. pwd</figcaption>
+</figure>
+<p><u><strong>P</strong></u>rint **<u>w</u>**orking **<u>d</u>**irectory, 현재 작업 디렉터리의 이름(경로)을 출력한다.</p>
+<p>​</p>
+</li>
+<li>
+<p><code>cd</code></p>
+<figure>![cd](thu_2016722092_정동호.assets\cd.png)
+<figcaption>그림 2-4. cd</figcaption>
+</figure>
+<p>**<u>C</u>**hange the current **<u>d</u>**irectory, 즉 현재 작업 디렉터리를 변경한다. 이때 인자로 ~를 주면 아무 인자 없는 <code>cd</code>와 같은 동작을 하며 현재 유저의 home 디렉터리로 이동한다. -를 주면 환경변수 $OLDPWD에 저장된 이전 경로로 이동한다.</p>
+<p>​</p>
+</li>
+<li>
+<p><code>ls</code></p>
+<figure>![ls](thu_2016722092_정동호.assets\ls.png)
+<figcaption>그림 2-5. ls</figcaption>
+</figure>
+<p>디렉터리의 내용들을 나열한다. a 옵션을 주면 숨김 파일도 출력해주고 F 옵션을 주면 파일 종류를 표시해준다. 마지막으로 l옵션을 주면 권한, 소유자, 그룹, 이름 등등의 더 자세한 정보를 표시해준다.</p>
+<p>​</p>
+</li>
+<li>
+<p><code>chmod</code></p>
+<figure>![chmod](thu_2016722092_정동호.assets/chmod.png)
+<figcaption>그림 2-6. chmod</figcaption>
+</figure>
+<p>**<u>Ch</u>**ange file <strong><u>mod</u></strong> bits, 사용 문법은 <em>chmod [options] mode[,mode] file1 [file2 ...]</em> 이다. 권한을 지정해줄때 그림 2-6의 처음과 같이 <em>Symbolic</em> 모드를 사용하거나 마지막처럼 <em>Octal</em> 모드를 사용할 수 있다.<br>
+파일과 디렉터리에 적용되는 권한의 효과는 다음과 같다:</p>
+<ul>
+<li>
+<p><strong>read</strong>(4)</p>
+<ul>
+<li><strong>파일</strong>     : 파일의 내용을 읽을 수 있다.</li>
+<li><strong>디렉터리</strong> : 디렉터리의 내용(안에 존재하는 파일 또는 하위 디렉터리)을 나열 할 수 있다.</li>
+</ul>
+</li>
+<li>
+<p><strong>write</strong>(2)</p>
+<ul>
+<li><strong>파일</strong>     : 파일의 내용을 바꿀 수 있다.</li>
+<li><strong>디렉터리</strong> : 디렉터리내 임의의 파일을 만들거나 지울 수 있다.</li>
+</ul>
+</li>
+<li>
+<p><strong>exec</strong>(1)</p>
+<ul>
+<li><strong>파일</strong>     : 명령어로써 파일을 실행시킬 수 있다.</li>
+<li><strong>디렉터리</strong> : 디렉터리의 내용에 접근할 수 있다. 즉 <code>cd</code>로 접근이 가능하다.</li>
+</ul>
+<p>​</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>mkdir</code></p>
+<figure>![mkdir](thu_2016722092_정동호.assets/mkdir.png)
+<figcaption>그림 2-7. mkdir</figcaption>
+</figure>
+<p>**<u>m</u><strong>a</strong><u>k</u>**e <strong><u>dir</u><strong>ectories, 디렉터리를 생성한다. directori</strong>es</strong> 라서 인자를 여러개 주면 한번에 여러 폴더를 만들 수 있다. 또는 p옵션을 주면 한번에 subdirectory까지 생성이 가능하다.</p>
+<p>​</p>
+</li>
+<li>
+<p><code>rmdir</code></p>
+<figure>![rmdir](thu_2016722092_정동호.assets/rmdir.png)
+<figcaption>그림 2-8. rmdir</figcaption>
+</figure>
+<p>**<u>r</u><strong>e</strong><u>m</u>**ove empty **<u>dir</u>**ectories, 디렉터리를 삭제한다. 단, <strong>디렉터리가 비어있어야 한다</strong>. 그렇지 않은 경우에는 <code>rm</code>에 [rR] 옵션을 주면 된다.</p>
+<p>​</p>
+</li>
+<li>
+<p><code>rm</code></p>
+<figure>![rm](thu_2016722092_정동호.assets/rm.png)
+<figcaption>그림 2-9. rm</figcaption>
+</figure>
+<p>**<u>r</u><strong>e</strong><u>m</u>**ove, 파일 또는 디렉터리들을 삭제한다. [rR] 옵션을 주면 비어있지 않은 디렉터리도 하위 폴더를 DFS로 탐색하며 삭제한다. i 옵션을 줄 경우 지울때마다 확인을 거쳐 좀 더 안전한 작업을 할 수 있다.</p>
+<p>​</p>
+</li>
+<li>
+<p><code>mv</code></p>
+  <figure>![mv](thu_2016722092_정동호.assets/mv.png)
+  <figcaption>그림 2-10. mv</figcaption>
+  </figure>
+</li>
+</ol>
+<p>**<u>m</u><strong>o</strong><u>v</u>**e, 사용 문법은 <em>mv [OPTION]... SRC DST</em> 로 원본이 먼저 나오고 목적지가 마지막에 나온다. 기본적으로 파일을 이동시키지만 이름을 바꾸는 데에도 사용할 수 있다.</p>
+<ol start="11">
+<li><code>ln</code>  <figure>![ln](thu_2016722092_정동호.assets/ln.png)
+  <figcaption>그림 2-11-1. ln</figcaption>
+  </figure>
+</li>
+</ol>
+   <figure>![ln cp](thu_2016722092_정동호.assets/ln cp.png)
+   <figcaption>그림 2-11-2. ln vs cp</figcaption>
+   </figure>
+   <figure>![ln symbolic](thu_2016722092_정동호.assets/ln symbolic.png)
+   <figcaption>그림 2-11-3. ln symbolic link</figcaption>
+   </figure>
+<p>**<u>l</u><strong>i</strong><u>n</u>**k, <code>ln</code>은 <em>ln [OPTION]... TARGET [LINK_NAME]</em> 로 사용한다. 파일들 간에 link 를 만들어주는 역할을 하며 그림 2-11-1,2 를 통해 <code>cp</code>와의 차이점을 알 수 있다. link에는 symbolic—또는 soft— 과 hard 두 종류가 있다. 둘의 차이는 다음 그림과 같다:</p>
+   <figure>![soft vs hard](thu_2016722092_정동호.assets/soft vs hard.jpg)
+   <figcaption>그림 2-11-4. soft vs hard</figcaption>
+   </figure>
+<p>이외에 hardlink는 같은 파일 시스템에서만 사용하다는 차이도 있다.</p>
+<ol start="12">
+<li>
+<p><code>touch</code></p>
+  <figure>![touch](thu_2016722092_정동호.assets/touch.png)
+  <figcaption>그림 2-12. touch</figcaption>
+  </figure>
+<p>빈 파일을 만들거나 파일의 [ma]time을 현재시간으로 변경한다.</p>
+<p>​</p>
+</li>
+<li>
+<p><code>ps</code></p>
+<figure>![ps](thu_2016722092_정동호.assets/ps.png)
+<figcaption>그림 2-13. ps</figcaption>
+</figure>
+현재 프로세스들의 상태를 보여준다. 강의자료에서 나온 두가지 예를 실행시켜 보았는데 아무 옵션을 주지 않을 경우 t 옵션을 준것과 동일하며 현재 터미널에서 실행자의 EUID를 가진 프로세스들을 나열한다. [eA] 옵션은 모든 프로세스를 출력하고 f 옵션은 더 자세한 정보를 출력해준다.
+<p>필드별 의미는 다음과 같다:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">필드명</th>
+<th style="text-align:center">의미</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">UID</td>
+<td style="text-align:center">프로세스 소유자의 유저네임</td>
+</tr>
+<tr>
+<td style="text-align:center">PID</td>
+<td style="text-align:center">프로세스 ID</td>
+</tr>
+<tr>
+<td style="text-align:center">PPID</td>
+<td style="text-align:center">부모 프로세스 ID</td>
+</tr>
+<tr>
+<td style="text-align:center">C</td>
+<td style="text-align:center">CPU 사용량 및 스케줄링 정보</td>
+</tr>
+<tr>
+<td style="text-align:center">STIME</td>
+<td style="text-align:center">프로세스가 시작한 시간</td>
+</tr>
+<tr>
+<td style="text-align:center">TTY</td>
+<td style="text-align:center">프로세스가 관련된 터미널</td>
+</tr>
+<tr>
+<td style="text-align:center">TIME</td>
+<td style="text-align:center">전체 CPU 사용량</td>
+</tr>
+<tr>
+<td style="text-align:center">CMD</td>
+<td style="text-align:center">인자를 포함한 프로세스의 이름</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p><code>pstree</code></p>
+<figure>![pstree](thu_2016722092_정동호.assets/pstree.png)
+<figcaption>그림 2-14. pstree</figcaption>
+</figure>
+<p>프로세스들을 트리형태로 출력한다. 전체 프로세스 구조를 파악하는데는 시각적으로 <code>ps</code>보다 좋아보인다.</p>
+<p>​</p>
+</li>
+<li>
+<p><code>exit</code></p>
+<figure>![exit](thu_2016722092_정동호.assets/exit.png)
+<figcaption>그림 2-15. exit</figcaption>
+</figure>
+<p>현재 쉘에서 나온다. 그림 2-15에서 처럼 csh 쉘에서 나와 bash로 돌아온 것을 확인할 수 있다.</p>
+<p>​</p>
+</li>
+<li>
+<p><code>kill</code></p>
+<figure>![SIGTERM](thu_2016722092_정동호.assets/SIGTERM.png)
+<figcaption>그림 2-16-1. SIGTERM</figcaption>
+</figure>
+<p><code>kill</code>은 <em>kill [-s sigspec | -n signum | -sigspec] pid | jobspec ...</em> 또는 <em>kill -l [sigspec]</em> 로 사용한다. sigspec을 명시하지 않을 경우 기본으로 15) SIGTERM이 사용된다. 이 경우 <code>ps</code>에선 Terminated로 표시되며 다음과 같이 SIGTERM으로 종료되지 않을 경우 9) SIGKILL을 사용한다:</p>
+<figure>![SIGKILL](thu_2016722092_정동호.assets/SIGKILL.png)
+<figcaption>그림 2-16-2. SIGKILL</figcaption>
+</figure>
+<p>​</p>
+</li>
+<li>
+<p><code>time</code></p>
+<figure>![time](thu_2016722092_정동호.assets/time.png)
+<figcaption>그림 2-17. time</figcaption>
+</figure>
+<p>인자로 주어진 프로그램을 실행하고 시스템 자원 사용량을 요약해서 보여주는 명령어이다. 요약 정보에는 real, user, sys가 있는데 각 의미는 다음과 같다.</p>
+<ul>
+<li><strong>real</strong> : 실행 시작부터 종료까지의 시간. I/O 지연 및 스케줄링에 인한 대기등도 포함.</li>
+<li><strong>user</strong> : 유저모드에서 사용한 CPU 시간.</li>
+<li><strong>sys</strong>  : 커널에서 사용한 CPU 시간.</li>
+</ul>
+<p>user + sys 값은 멀티스레드의 경우 각각의 시간을 모두 합하므로 real보다 커질 수 있다.</p>
+<p>​</p>
+</li>
+<li>
+<p><code>passwd</code></p>
+<figure>![passwd](thu_2016722092_정동호.assets/passwd.png)
+<figcaption>그림 2-18. passwd</figcaption>
+</figure>
+<p><strong><u>passw</u><strong>or</strong><u>d</u></strong>, 유저의 비밀번호를 변경한다. 일반유저는 자신의 비밀번호만 수정할 수 있고 superuser의 경우 모든 계정의 비밀번호를 변경할 수 있다.</p>
+<p>​</p>
+</li>
+<li>
+<p><code>uname</code></p>
+<figure>![uname](thu_2016722092_정동호.assets/uname.png)
+<figcaption>그림 2-19. uname</figcaption>
+</figure>
+<p>시스템 정보를 출력한다. 아무 옵션도 주지 않을 경우 s 옵션을 준것과 동일하며 기본적인 옵션들의 의미는 다음과 같다.</p>
+<ul>
+<li><strong>s</strong> : 커널 이름 출력</li>
+<li><strong>r</strong> : 커널 릴리즈 출력</li>
+<li><strong>m</strong> : 장비 하드웨어 이름 출력</li>
+<li><strong>a</strong> : 모든 정보 출력—커널 이름, 네트워크 노드 호스트이름, 커널 릴리즈,  커널 버전, 장비 하드웨어 이름, 프로세서 타입, 하드웨어 플랫폼, os 순으로.</li>
+</ul>
+<p>​</p>
+</li>
+<li>
+<p><code>wc</code></p>
+<figure>![wc](thu_2016722092_정동호.assets/wc.png)
+<figcaption>그림 2-20. wc</figcaption>
+</figure>
+<p>각 파일의 개행, 단어, 바이트 수를 알려준다. 단어 수만 알고 싶다면 w옵션을 주면 된다. 옵션과 파일은 동시에 여러개를 줄 수 있다.</p>
+<p>​</p>
+</li>
+<li>
+<p><code>more</code></p>
+<figure>![more](thu_2016722092_정동호.assets/more.png)
+<figcaption>그림 2-21. more</figcaption>
+</figure>
+<p>출력 결과가 터미널 크기를 넘어가는 경우 사용자 편의를 위해 자동으로 멈춰준다. 눈에 띄는 옵션으로는 <strong>f</strong>(너무 길어서 개행된 줄은 무시), <strong>s</strong>(연속된 빈줄은 하나로 압축), <strong>-number</strong>(사용할 스크린 크기), <strong>+number</strong>(출력을 시작할 줄번호), <strong>+/string</strong>(출력하기 전에 탐색할 문자열)가 있다.</p>
+<p>​</p>
+</li>
+<li>
+<p><code>echo</code></p>
+<figure>![echo](thu_2016722092_정동호.assets/echo.png)
+<figcaption>그림 2-22. echo</figcaption>
+</figure>
+<p>한 줄 짜리 텍스트를 출력한다. 단, e옵션을 줄 경우 backslash escape를 통해 여러 줄도 가능하다.</p>
+<p>​</p>
+</li>
+<li>
+<p><code>alias</code></p>
+<figure>![alias](thu_2016722092_정동호.assets/alias.png)
+<figcaption>그림 2-23. alias</figcaption>
+</figure>
+<p><code>alias</code>의 인자로 이름=값 쌍을 제공함으로써 비영구적인 별칭(alias)을 만들 수 있다. 나중에도 계속 쓰고 싶으면 ~/.bash_aliases에 등록한다.</p>
+<p>​</p>
+</li>
+<li>
+<p><code>find</code></p>
+<figure>![find](thu_2016722092_정동호.assets/find.png)
+<figcaption>그림 2-24. find</figcaption>
+</figure>
+<p><code>find</code>는 <em>find  [-H]  [-L]  [-P]  [-D  debugopts]  [-Olevel]  [starting-point...]  [expression]</em> 로 사용하며 디렉터리 계층에서 파일들을 탐색한다. 그림 2-24에서 나온 name옵션은 파일을 탐색할 때 따라오는 경로는 제외할때 쓴다.</p>
+<p><code>man find</code>를 해보니 생각보다 내용이 많아서 다는 못해도 어느정도 정리할 필요를 느꼇다. --delete 옵션을 주면 찾은 파일들을 지운다. -exec em -i {} ; 옵션을 주면 똑같이 지우긴 하나 매번 물어보므로 더 안전하다. -type d 옵션을 줄 경우 디렉터리를 탐색한다. [+-]mtime [+-]num 옵션을 통해 마지막 수정시간으로 탐색이 가능하다. -perm 옵션을 통해 특정 권한을 가진 파일들을 탐색할 수 있다.</p>
+<p>​</p>
+</li>
+<li>
+<p><code>grep</code></p>
+<figure>![grep](thu_2016722092_정동호.assets/grep.png)
+<figcaption>그림 2-25. grep</figcaption>
+</figure>
+<p>패턴과 매치되는 줄들을 출력한다. 사용법은 두가지가 있는데</p>
+<p><em>grep [OPTIONS] PATTERN [FILE...]</em><br>
+<em>grep [OPTIONS] [-e PATTERN]...  [-f FILE]...  [FILE...]</em></p>
+<p>가 있다. 각각 E, F, r 옵션에 대응하는 egrep, fgrep, rgrep 변종이 있지만 deprecated되었고 하위호환성을 위해서만 존재한다고 한다. 기본 grep의 사용법은 그림 2-25와 같고 두번째 처럼 e 옵션을 여러개 줄수도 있다. ?, +, | 등등의 확장 정규식 표현을 사용하려면 E 옵션을 사용한다.</p>
+<p>​</p>
+</li>
+</ol>
+<h3 class="mume-header" id="3%EC%A3%BC%EC%B0%A8">3주차</h3>
+
+<ol>
+<li>
+<p><code>vi</code></p>
+<figure>![vi-insert](thu_2016722092_정동호.assets/vi-insert.png)
+<figcaption>그림 3-1-1. vi - insert</figcaption>
+</figure>
+<p>Nomal 모드에서 <code>i</code>를 입력하여 Insert mode로 진입한 뒤 insert를 입력했다.</p>
+<p>​</p>
+<figure>![vi-delete](thu_2016722092_정동호.assets/vi-delete.png)
+<figcaption>그림 3-1-2. vi - delete</figcaption>
+</figure>
+<p>e에 커서를 두고 Normal 모드에서 <code>D</code>를 입력하여 줄 끝까지 삭제했다.</p>
+<figure>![vi-save](thu_2016722092_정동호.assets/vi-save.png)
+<figcaption>그림 3-1-3. vi - save</figcaption>
+</figure>
+<p>Normal 모드에서 <code>:w</code> 명령을 통해 현재 내용을 저장했다.</p>
+<figure>![vi-search](thu_2016722092_정동호.assets/vi-search.png)
+<figcaption>그림 3-1-4. vi - search</figcaption>
+</figure>
+<p><code>/test</code> 를 통해 test라는 문자열을 찾았다.</p>
+<figure>![vi-replace](thu_2016722092_정동호.assets/vi-replace.png)
+<figcaption>그림 3-1-5. vi - replace by pattern</figcaption>
+</figure>
+<p>과제에서는 패턴에 의한 치환이 있었으나 강의자료에는 없어서 그냥 적당한 명령을 실행하여 모든 줄의 모든 =를 -로 치환하는 작업을 수행하였다.</p>
+</li>
+<li>
+<p><code>make</code></p>
+<figure>![gcc](thu_2016722092_정동호.assets/gcc.png)
+<figcaption>그림 3-2-1. gcc</figcaption>
+</figure>
+<p>강의 자료에 나온대로 <code>gcc</code>를 사용해 보았다. 다음으로 Makefile을 사용해본다. 명명 일관성을 위해 makefile이라 하려다가 <code>man make</code>에서 디렉터리 항목을 나열할 때 Makefile을 쓰면 README처럼 앞쪽에 강조된다는 이유로 Makefile을 권장하길래 Makefile로 만들었다.</p>
+<p>언뜻 보면 Makefile은 C나 쉘 스크립트보다 어려워 보인다. 그래서 이것저것 찾아봤고 그 중 강의자료에 나온것들을 정리해보았다. 일단 <code>make</code>의 존재 의의는 서로 의존관계에 있는 파일들을 자동으로 관리해 준다는 것이다. <code>make</code>는 자동으로 파일들의 마지막 수정시간(mtime)을 비교하여 target보다 dependency가 최신이거나 target이 존재하지 않으면 해당 rule을 실행시키고 만약 해당 dependency가 없으면 그 dependency가 target인 rule을 찾아 먼저 실행시킨다. 따라서 <code>make</code> &amp; Makefile을 사용하면 여러 파일들이 서로 의존하고 있는 프로젝트에서 매번 모두 재컴파일을 해야할 수고를 덜 수 있다.</p>
+<p>​</p>
+<figure>![makefile-content](thu_2016722092_정동호.assets/makefile-content.png)
+<figcaption>그림 3-2-2. makefile content</figcaption>
+</figure>
+<p>OBJS ... CC는 변수로써 $()를 통해 참조될 수 있다. 들여쓰기 없이 :(콜론)이 포함된 줄은 rule로써 일반적인 경우엔 <code>make</code>를 할 시 첫번째 rule만 실행된다. :를 기준으로 왼쪽은 target, 오른쪽은 dependency이다. 그 밑에는 Tab으로 들여쓰기된 command가 나오고 위에서 정의된 값으로 풀어쓰면 <code>gcc -o test.o test1.c test2.c</code>가 된다. 따라서 기본적으로 <code>make</code>를 실행할 경우 현재경로에서 test1.c 와 test2.c를 찾아 test.o를 빌드하고 <code>make clean</code>으로 실행할 경우 백업파일들을 포함한 관련된 모든 파일들을 지운다.</p>
+<p><code>make</code>의 실행 결과는 다음과 같다:</p>
+<figure>![make](thu_2016722092_정동호.assets/make.png)
+<figcaption>그림 3-2-3. make</figcaption>
+</figure>
+<p>​</p>
+</li>
+<li>
+<p><code>gdb</code></p>
+<figure>![gdb sample code](thu_2016722092_정동호.assets/gdb sample code.png)
+<figcaption>그림 3-3-1. gdb sample code</figcaption>
+</figure>
+<p><code>gdb</code>를 사용하기 앞서 강의자료에 나온대로 코드를 작성했다. 실행하면 다음과 같은 오류가 발생한다:</p>
+<figure>![gdb segmentation fault](thu_2016722092_정동호.assets/gdb segmentation fault.png)
+<figcaption>그림 3-3-2. gdb segmentation fault</figcaption>
+</figure>
+<p>​</p>
+<p>그래서 강의자료에 나온대로 <code>gdb</code>를 사용했다. <code>gdb</code>를 통한 디버깅 과정은 다음과 같다:</p>
+<figure>![gdb usage](thu_2016722092_정동호.assets/gdb usage.png)
+<figcaption>그림 3-3-3. gdb usage</figcaption>
+</figure>
+<p><code>b 9</code> 로 9번째 라인에 중단점을 걸고 <code>r 11 22 33</code>으로 인자 11, 22, 33을 주어 프로그램을 실행했다. for문 전후로 i의 값을 관찰해보고 segmentation fault가 일어나는 지점에서 <code>bt</code> 를 통해 스택을 확인할 수 있었다.</p>
+</li>
+</ol>
+<h2 class="mume-header" id="reference-1">Reference</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/Man_page">https://en.wikipedia.org/wiki/Man_page</a> — man page 부가 설명</p>
+<p><a href="https://www.interserver.net/tips/kb/learn-linux-file-system-permissions/">https://www.interserver.net/tips/kb/learn-linux-file-system-permissions/</a>, 강의자료실-2018-1_SSLab_week02_Unix Linux Commands.pdf — 전반적인 내용, File permission 부가 설명</p>
+<p><code>man mkdir</code> — 어떻게 mkdir로 subdirectory까지 생성 가능한지 정보</p>
+<p><a href="https://askubuntu.com/a/801191">https://askubuntu.com/a/801191</a> — soft link vs hard link 부가 설명</p>
+<p><code>man ps</code> — 아무 옵션도 안준 ps는 무엇을 출력하는지 설명</p>
+<p><a href="https://kb.iu.edu/d/afnv">https://kb.iu.edu/d/afnv</a> — ps의 각 필드의 의미</p>
+<p><a href="https://stackoverflow.com/a/556411/7899226">https://stackoverflow.com/a/556411/7899226</a> — time의 각 요약 정보의 의미</p>
+<p><code>man uname</code> — uname 옵션들의 의미</p>
+<p><code>man more</code> — more 옵션들의 의미</p>
+<p><a href="https://shapeshed.com/unix-find/">https://shapeshed.com/unix-find/</a> — find 부가 설명</p>
+<p><a href="http://www.cs.colby.edu/maxwell/courses/tutorials/maketutor/">http://www.cs.colby.edu/maxwell/courses/tutorials/maketutor/</a><br>
+<a href="http://mrbook.org/blog/tutorials/make/">http://mrbook.org/blog/tutorials/make/</a><br>
+<a href="http://makefiletutorial.com/">http://makefiletutorial.com/</a> — make &amp; Makefile 부가 설명</p>
+<style>
+figure {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 70%;
+}
+
+figure img {
+    vertical-align: top;
+}
+figure figcaption {
+    text-align: center;
+}
+
+</style>
+      </div>
+      <div class="md-sidebar-toc"><ul>
+<li><a href="#1%EC%B0%A8-%EA%B3%BC%EC%A0%9C-%EB%A6%AC%EB%88%85%EC%8A%A4-%EA%B8%B0%EC%B4%88">1차 과제 - 리눅스 기초</a></li>
+<li><a href="#%EB%AA%A9%EC%B0%A8">목차</a></li>
+<li><a href="#ubuntu-installation">Ubuntu Installation</a>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#result">Result</a></li>
+<li><a href="#reference">Reference</a></li>
+</ul>
+</li>
+<li><a href="#usage-of-linux-commands">Usage of Linux Commands</a>
+<ul>
+<li><a href="#introduction-1">Introduction</a></li>
+<li><a href="#result-1">Result</a>
+<ul>
+<li><a href="#2%EC%A3%BC%EC%B0%A8">2주차</a></li>
+<li><a href="#3%EC%A3%BC%EC%B0%A8">3주차</a></li>
+</ul>
+</li>
+<li><a href="#reference-1">Reference</a></li>
+</ul>
+</li>
+</ul>
+</div>
+      <a id="sidebar-toc-btn">≡</a>
+    </body>
+    
+    
+    
+    
+    
+    
+    <script>
+(function bindTaskListEvent() {
+  var taskListItemCheckboxes = document.body.getElementsByClassName('task-list-item-checkbox')
+  for (var i = 0; i < taskListItemCheckboxes.length; i++) {
+    var checkbox = taskListItemCheckboxes[i]
+    var li = checkbox.parentElement
+    if (li.tagName !== 'LI') li = li.parentElement
+    if (li.tagName === 'LI') {
+      li.classList.add('task-list-item')
+    }
+  }
+}())    
+</script>
+    
+<script>
+
+var sidebarTOCBtn = document.getElementById('sidebar-toc-btn')
+sidebarTOCBtn.addEventListener('click', function(event) {
+  event.stopPropagation()
+  if (document.body.hasAttribute('html-show-sidebar-toc')) {
+    document.body.removeAttribute('html-show-sidebar-toc')
+  } else {
+    document.body.setAttribute('html-show-sidebar-toc', true)
+  }
+})
+</script>
+      
+  </html>
