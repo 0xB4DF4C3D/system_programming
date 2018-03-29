@@ -124,8 +124,9 @@ int find_subcache(const char *path_subcache, const char *hash_back){
  * @return [int] HIT:0, MISS:1, FAIL:-1
  */
 int find_primecache(const char *path_primecache, const char *hash_full){
-    struct dirent *pFile = NULL;
-    DIR           *pDir  = NULL;
+    struct dirent *pFile  = NULL;
+    DIR           *pDir   = NULL;
+    struct stat path_stat;
 
     char hash_front[PROXY_LEN_PREFIX + 1]                 = {0};
     char hash_back[PROXY_LEN_HASH - PROXY_LEN_PREFIX + 1] = {0};
@@ -148,17 +149,29 @@ int find_primecache(const char *path_primecache, const char *hash_full){
         pDir = opendir(path_primecache); // and try opening it again
     }
     
-    // find the primecache while traversing the path
-    for(pFile=readdir(pDir); pFile; pFile=readdir(pDir))
-        if(strcmp(hash_front, pFile->d_name) == 0)
-            break;        
-    closedir(pDir);
-
-
     // make the full path of the directory which contains subcaches
     path_subcache_size = sizeof(char)*strlen(path_primecache) + PROXY_LEN_PREFIX + 8;
     path_subcache = (char*)malloc(path_subcache_size);
     snprintf(path_subcache, path_subcache_size, "%s/%s", path_primecache, hash_front);
+
+    // find the primecache while traversing the path
+    for(pFile=readdir(pDir); pFile; pFile=readdir(pDir)){
+
+        // if the primecache was found
+        if(strcmp(hash_front, pFile->d_name) == 0){
+
+            // check whether it is a directory or not
+            stat(path_subcache, &path_stat);
+            if(S_ISDIR(path_stat.st_mode)){
+                break;
+            }else{ // if the file was regular, then something's wrong in the cache directory
+                printf("[!] find_primecache fail\n");
+                printf("[+] the cache directory is corrupted\n");
+                return -1;
+            }
+        }
+    }
+    closedir(pDir);
     
     // if there isn't the path of subcache, then create that path
     if(pFile == NULL)
