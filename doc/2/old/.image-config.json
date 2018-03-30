@@ -1,0 +1,15 @@
+{
+  "storePath": "/images",
+  "wwwRoot": "/",
+  "grammars": {
+    "Markdown": {
+      "url": "<img src=\"${url}\">"
+    },
+    "GitHub Markdown": {
+      "url": "<img src=\"${url}\">"
+    },
+    "HTML": {
+      "url": "<img src=\"${url}\">"
+    }
+  }
+}
