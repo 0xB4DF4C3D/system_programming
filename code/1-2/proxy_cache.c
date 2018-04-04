@@ -29,9 +29,12 @@
  */
 typedef enum {
 PROXY_LEN_PREFIX = 3,    ///< A length of the front hash.
-PROXY_LEN_HASH = 41,     ///< A length of the full hash(in the SHA1).
-PROXY_MAX_URL = 2048,    ///< A maximum length of an url.
-PROXY_MAX_PATH = 4096    ///< A maximum length of a path.
+PROXY_LEN_HASH   = 41,   ///< A length of the full hash(in the SHA1).
+PROXY_MAX_URL    = 2048, ///< A maximum length of an url.
+PROXY_MAX_PATH   = 4096, ///< A maximum length of a path.
+
+PROXY_HIT  = 8000,
+PROXY_MISS = 8001
 } Proxy_constants;
 
 /**
@@ -103,16 +106,16 @@ int find_subcache(const char *path_subcache, const char *hash_back){
         fp = fopen(path_fullcache, "w");
         if(fp == NULL){
             printf("[!] %s : %s\n", path_fullcache, strerror(errno));
-            return -1;
+            return EXIT_FAILURE;
         }
         fwrite(test_msg, 1, sizeof(test_msg), fp);
         fclose(fp);
 
         free(path_fullcache);
-        return EXIT_FAILURE;
+        return PROXY_MISS;
     }else{              // for HIT case
         // TODO
-        return EXIT_SUCCESS;
+        return PROXY_HIT;
     }
 }
 
@@ -167,7 +170,7 @@ int find_primecache(const char *path_primecache, const char *hash_full){
             }else{ // if the file was regular, then something's wrong in the cache directory
                 printf("[!] find_primecache fail\n");
                 printf("[+] the cache directory is corrupted\n");
-                return -1;
+                return EXIT_FAILURE;
             }
         }
     }
@@ -189,6 +192,11 @@ int main(int argc, char* argv[]){
     char url_input[PROXY_MAX_URL];
     char url_hash[PROXY_LEN_HASH];
     char path_cache[PROXY_MAX_PATH];
+
+    int res = 0;
+
+    size_t count_hit  = 0;
+    size_t count_miss = 0;
 
     // set full permission for the current process.
     umask(0);
@@ -212,7 +220,20 @@ int main(int argc, char* argv[]){
 
         // hash the input URL and find the cache with it
         sha1_hash(url_input, url_hash);
-        find_primecache(path_cache, url_hash);
+        res = find_primecache(path_cache, url_hash);
+
+        switch(res){
+            case PROXY_HIT:
+                count_hit += 1;
+                break;
+            
+            case PROXY_MISS:
+                count_miss += 1;
+                break;
+
+            default:
+                break;
+        }
     }
 
     return EXIT_SUCCESS;
