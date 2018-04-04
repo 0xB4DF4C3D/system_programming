@@ -11,10 +11,13 @@
 #include <dirent.h>     // format of directory entries
 #include <errno.h>      // system error numbers
 #include <fcntl.h>      // file control options
+#include <libgen.h>
 #include <pwd.h>        // password structure
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>     // standard symbolic constants and types
 
 #include <openssl/sha.h>// to use SHA1
@@ -72,6 +75,53 @@ char *sha1_hash(char *input_url, char *hashed_url){
     return hashed_url;
 }
 
+int write_log(const char *path, const char *type, const char *msg, bool time_){
+    FILE *fp        = NULL;
+
+    char msg_time[21] = {0};
+
+    char *msg_total       = NULL;
+    size_t msg_total_size = 0;
+
+    char *path_tmp = NULL;
+
+    struct tm *ltp = NULL;
+    time_t now;
+
+    // try creating a file which contatins a dummy data to the path of subcache
+    fp = fopen(path, "a+");
+    if(fp == NULL){
+        if(errno == ENOENT){
+            path_tmp = (char*)malloc(sizeof(char)*strlen(path)+1);
+            strcpy(path_tmp, path);
+            mkdir(dirname(path_tmp), S_IRWXU | S_IRWXG | S_IRWXO);       
+            fp = fopen(path, "a+");
+            free(path_tmp);
+        } else {
+            printf("[!] %s : %s\n", path, strerror(errno));
+            return EXIT_FAILURE;
+        }
+    }
+
+    msg_total_size = sizeof(char) * (strlen(type) + strlen(msg) + 32);
+    msg_total = (char*)malloc(msg_total_size);
+    
+    if(time_){
+        time(&now);
+        ltp = localtime(&now);
+        strftime(msg_time, 32, "-[%Y/%m/%d, %T]", ltp);
+    } else { 
+    }
+
+    snprintf(msg_total, msg_total_size, "[%s]%s%s\n", type, msg, msg_time);
+
+    fwrite(msg_total, 1, strlen(msg_total), fp);
+    fclose(fp);
+
+    free(msg_total);
+    return EXIT_SUCCESS;
+}
+
 /**
  * Find subcache(a back part of the hashed URL)
  * @param path_subcache A const char pointer to the path containing subcaches.
@@ -82,9 +132,6 @@ char *sha1_hash(char *input_url, char *hashed_url){
 int find_subcache(const char *path_subcache, const char *hash_back){
     struct dirent *pFile = NULL;
     DIR           *pDir  = NULL;
-    FILE          *fp    = NULL;
-
-    char test_msg[256] = "This is a test message.\n";   // just dummy data
 
     char   *path_fullcache      = NULL;
     size_t  path_fullcache_size = 0;
@@ -102,14 +149,7 @@ int find_subcache(const char *path_subcache, const char *hash_back){
         path_fullcache = (char*)malloc(path_fullcache_size);
         snprintf(path_fullcache, path_fullcache_size, "%s/%s", path_subcache, hash_back);
 
-        // try creating a file which contatins a dummy data to the path of subcache
-        fp = fopen(path_fullcache, "w");
-        if(fp == NULL){
-            printf("[!] %s : %s\n", path_fullcache, strerror(errno));
-            return EXIT_FAILURE;
-        }
-        fwrite(test_msg, 1, sizeof(test_msg), fp);
-        fclose(fp);
+        write_log(path_fullcache, "TEST","DUMMY",false);
 
         free(path_fullcache);
         return PROXY_MISS;
@@ -190,23 +230,32 @@ int find_primecache(const char *path_primecache, const char *hash_full){
 int main(int argc, char* argv[]){
 
     char url_input[PROXY_MAX_URL];
-    char url_hash[PROXY_LEN_HASH];
+    char url_hash[PROXY_LEN_HASH + 1];
+
     char path_cache[PROXY_MAX_PATH];
+    char path_log[PROXY_MAX_PATH];
 
     int res = 0;
 
     size_t count_hit  = 0;
     size_t count_miss = 0;
 
+    time_t time_start, time_end;
+
+    char buf[BUFSIZ] = {0};
+
+    time(&time_start);
+
     // set full permission for the current process.
     umask(0);
 
     // try getting current user's home path and concatenate a cache path
-    if(getHomeDir(path_cache) == NULL){
+    if(getHomeDir(path_cache) == NULL || getHomeDir(path_log) == NULL){
         printf("[!] getHomeDir fail\n");
         return EXIT_FAILURE;
     }
     strcat(path_cache, "/cache/");
+    strcat(path_log, "/logfile/logfile.txt");
 
     // receive an input till the input is 'bye'
     while(1){
@@ -225,16 +274,26 @@ int main(int argc, char* argv[]){
         switch(res){
             case PROXY_HIT:
                 count_hit += 1;
+                memmove(url_hash + 3 + 1,
+                        url_hash + 3,
+                        PROXY_LEN_HASH - 3);
+                url_hash[3] = '/';
+                write_log(path_log, "Hit", url_hash, true);
+                write_log(path_log, "Hit", url_input, false);
                 break;
             
             case PROXY_MISS:
                 count_miss += 1;
+                write_log(path_log, "Miss",url_input, true);
                 break;
 
             default:
                 break;
         }
     }
+    time(&time_end);
+    snprintf(buf, BUFSIZ, " run time: %f sec. #request hit : %lu, miss : %lu", difftime(time_end, time_start), count_hit, count_miss);
+    write_log(path_log, "Terminated", buf, false);
 
     return EXIT_SUCCESS;
 }
