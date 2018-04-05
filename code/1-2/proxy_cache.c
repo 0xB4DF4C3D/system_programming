@@ -1,17 +1,16 @@
 /**
- * System Programming Assignment #1-1 (proxy server)
+ * System Programming Assignment #1-2 (proxy server)
  * @file proxy_cache.c
  * @author name       : Jung Dong Ho
  * @n      email      : dongho971220@gmail.com
  * @n      student id : 2016722092
- * @date Wed Mar 28 00:08:27 KST 2018
- * @warning Implemented for only a MISS case yet.
+ * @date Thu Apr  5 22:41:51 KST 2018
  */
 
 #include <dirent.h>     // format of directory entries
 #include <errno.h>      // system error numbers
 #include <fcntl.h>      // file control options
-#include <libgen.h>
+#include <libgen.h>     // definitions for pattern matching functions
 #include <pwd.h>        // password structure
 #include <stdbool.h>
 #include <stdio.h>
@@ -31,13 +30,14 @@
  * @see MAN_PATH  : Not official but refer to the linux/limits.h and wikipedia.
  */
 typedef enum {
-PROXY_LEN_PREFIX = 3,    ///< A length of the front hash.
-PROXY_LEN_HASH   = 41,   ///< A length of the full hash(in the SHA1).
-PROXY_MAX_URL    = 2048, ///< A maximum length of an url.
-PROXY_MAX_PATH   = 4096, ///< A maximum length of a path.
+    PROXY_LEN_PREFIX = 3,  ///< A length of the front hash.
+    PROXY_LEN_HASH   = 41, ///< A length of the full hash(in the SHA1).
 
-PROXY_HIT  = 8000,
-PROXY_MISS = 8001
+    PROXY_MAX_URL    = 2048, ///< A maximum length of an url.
+    PROXY_MAX_PATH   = 4096, ///< A maximum length of a path.
+
+    PROXY_HIT  = 8000, ///< An arbitrary magic number for the HIT case.
+    PROXY_MISS = 8001  ///< An arbitrary magic number for the MISS case.
 } Proxy_constants;
 
 /**
@@ -75,46 +75,85 @@ char *sha1_hash(char *input_url, char *hashed_url){
     return hashed_url;
 }
 
-int write_log(const char *path, const char *type, const char *msg, bool time_){
+/**
+ * Insert a delimiter into a given string.
+ * @param str A char array that a delimiter'll be inserted into.
+ * @param size_max The size of str buffer.
+ * @param idx The location where the delimiter to be inserted into.
+ * @param delim A delimiter character.
+ * @return [int] Success:EXIT_SUCCESS, Fail:EXIT_FAILURE
+ */
+int insert_delim(char *str, size_t size_max, size_t idx, char delim){
+    // size for checking is there a room to insert a delim
+    size_t size = sizeof(char) * strlen(str);
+
+    // check memory overflow or invalid index
+    if(size_max <= size || size_max <= idx)
+        return EXIT_FAILURE;
+
+    // insert the delimiter into the position idx in the str.
+    memmove(str + idx + 1,
+            str + idx,
+            size - (idx + 1));
+    str[idx] = delim;
+
+    return EXIT_SUCCESS;
+}
+
+/**
+ * Write a log with a specific format.
+ * @param path A const char pointer pointing the path to write the log.
+ * @param header The header of a log message.
+ * @param body The body of a log message.
+ * @param time_ If it is true, write the log with current time. otherwise, don't.
+ * @return [int] Success:EXIT_SUCCESS, Fail:EXIT_FAILURE
+ */
+int write_log(const char *path, const char *header, const char *body, bool time_){
     FILE *fp        = NULL;
 
-    char msg_time[21] = {0};
+    // 32 is a moderately large value to save time information
+    char time_str[32] = {0};
 
     char *msg_total       = NULL;
     size_t msg_total_size = 0;
 
-    char *path_tmp = NULL;
+    // a string for temporary path(the case for absence of the log path)
+    char path_tmp[PROXY_MAX_PATH] = {0};
 
-    struct tm *ltp = NULL;
+    struct tm *ltp = NULL; // for local time
     time_t now;
 
-    // try creating a file which contatins a dummy data to the path of subcache
+    // try opening the path with the append mode
     fp = fopen(path, "a+");
-    if(fp == NULL){
-        if(errno == ENOENT){
-            path_tmp = (char*)malloc(sizeof(char)*strlen(path)+1);
-            strcpy(path_tmp, path);
+    if(fp == NULL){ // when the try went fail
+        if(errno == ENOENT){ // if its reason is absence of the log path,
+
+            // make the path, and try again
+            strncpy(path_tmp, path, strlen(path));
             mkdir(dirname(path_tmp), S_IRWXU | S_IRWXG | S_IRWXO);       
             fp = fopen(path, "a+");
-            free(path_tmp);
         } else {
             printf("[!] %s : %s\n", path, strerror(errno));
             return EXIT_FAILURE;
         }
     }
 
-    msg_total_size = sizeof(char) * (strlen(type) + strlen(msg) + 32);
+    // assign new memory block to msg_total by enough space
+    msg_total_size = sizeof(char) * (strlen(header) + strlen(body) + 32);
     msg_total = (char*)malloc(msg_total_size);
-    
+
+    // if time flag is true
     if(time_){
+        // then time_str has format as belows
         time(&now);
         ltp = localtime(&now);
-        strftime(msg_time, 32, "-[%Y/%m/%d, %T]", ltp);
-    } else { 
+        strftime(time_str, 32, "-[%Y/%m/%d, %T]", ltp);
     }
 
-    snprintf(msg_total, msg_total_size, "[%s]%s%s\n", type, msg, msg_time);
+    // join all parts of the message together
+    snprintf(msg_total, msg_total_size, "%s%s%s\n", header, body, time_str);
 
+    // write message to the path
     fwrite(msg_total, 1, strlen(msg_total), fp);
     fclose(fp);
 
@@ -126,15 +165,11 @@ int write_log(const char *path, const char *type, const char *msg, bool time_){
  * Find subcache(a back part of the hashed URL)
  * @param path_subcache A const char pointer to the path containing subcaches.
  * @param hash_back A const char pointer to be used as a subcache name.
- * @todo Implement the HIT case.
  * @return [int] HIT:0, MISS:1, FAIL:-1
  */
 int find_subcache(const char *path_subcache, const char *hash_back){
     struct dirent *pFile = NULL;
     DIR           *pDir  = NULL;
-
-    char   *path_fullcache      = NULL;
-    size_t  path_fullcache_size = 0;
 
     // find the subcache while traversing the path
     pDir = opendir(path_subcache);
@@ -143,18 +178,9 @@ int find_subcache(const char *path_subcache, const char *hash_back){
             break;
     closedir(pDir);
 
-    if(pFile == NULL){  // for MISS case, should create a file to the path of subcache
-        // make the full path of the subcache file
-        path_fullcache_size = sizeof(char)*strlen(path_subcache) + sizeof(char)*strlen(hash_back) + 8; // 8 for a safety
-        path_fullcache = (char*)malloc(path_fullcache_size);
-        snprintf(path_fullcache, path_fullcache_size, "%s/%s", path_subcache, hash_back);
-
-        write_log(path_fullcache, "TEST","DUMMY",false);
-
-        free(path_fullcache);
+    if(pFile == NULL){  // for MISS case
         return PROXY_MISS;
     }else{              // for HIT case
-        // TODO
         return PROXY_HIT;
     }
 }
@@ -174,8 +200,7 @@ int find_primecache(const char *path_primecache, const char *hash_full){
     char hash_front[PROXY_LEN_PREFIX + 1]                 = {0};
     char hash_back[PROXY_LEN_HASH - PROXY_LEN_PREFIX + 1] = {0};
 
-    char *path_subcache       = NULL;
-    size_t path_subcache_size = 0;
+    char path_subcache[PROXY_MAX_PATH] = {0};
 
     int result = 0;
 
@@ -188,21 +213,17 @@ int find_primecache(const char *path_primecache, const char *hash_full){
     if(pDir == NULL){   // if not exist,
         // create that path
         mkdir(path_primecache, S_IRWXU | S_IRWXG | S_IRWXO);
-
-        pDir = opendir(path_primecache); // and try opening it again
+        // and try opening it again
+        pDir = opendir(path_primecache); 
     }
-    
+
     // make the full path of the directory which contains subcaches
-    path_subcache_size = sizeof(char)*strlen(path_primecache) + PROXY_LEN_PREFIX + 8;
-    path_subcache = (char*)malloc(path_subcache_size);
-    snprintf(path_subcache, path_subcache_size, "%s/%s", path_primecache, hash_front);
+    snprintf(path_subcache, PROXY_MAX_PATH, "%s/%s", path_primecache, hash_front);
 
     // find the primecache while traversing the path
     for(pFile=readdir(pDir); pFile; pFile=readdir(pDir)){
-
         // if the primecache was found
         if(strcmp(hash_front, pFile->d_name) == 0){
-
             // check whether it is a directory or not
             stat(path_subcache, &path_stat);
             if(S_ISDIR(path_stat.st_mode)){
@@ -215,47 +236,54 @@ int find_primecache(const char *path_primecache, const char *hash_full){
         }
     }
     closedir(pDir);
-    
+
     // if there isn't the path of subcache, then create that path
     if(pFile == NULL)
         mkdir(path_subcache, S_IRWXU | S_IRWXG | S_IRWXO);
-    
+
     // find the subcache in the path of the current primecache
     result = find_subcache(path_subcache, hash_back);
-    free(path_subcache);
-    
+
     return result;
 }
 
 int main(int argc, char* argv[]){
 
-    char url_input[PROXY_MAX_URL];
-    char url_hash[PROXY_LEN_HASH + 1];
+    // char arrays for handling a url
+    char url_input[PROXY_MAX_URL] = {0};
+    char url_hash[PROXY_LEN_HASH] = {0};
 
-    char path_cache[PROXY_MAX_PATH];
-    char path_log[PROXY_MAX_PATH];
+    // char arrays for handling paths
+    char path_home[PROXY_MAX_PATH]      = {0};
+    char path_cache[PROXY_MAX_PATH]     = {0};
+    char path_fullcache[PROXY_MAX_PATH] = {0};
+    char path_log[PROXY_MAX_PATH]       = {0};
 
+    // result for finding cache
     int res = 0;
 
+    // counter for HIT and MISS cases
     size_t count_hit  = 0;
     size_t count_miss = 0;
 
     time_t time_start, time_end;
 
+    // temporary buffer for misc
     char buf[BUFSIZ] = {0};
 
+    // timer start
     time(&time_start);
 
     // set full permission for the current process.
     umask(0);
 
-    // try getting current user's home path and concatenate a cache path
-    if(getHomeDir(path_cache) == NULL || getHomeDir(path_log) == NULL){
+    // try getting current user's home path and concatenate cache and log paths
+    if(getHomeDir(path_home) == NULL){
         printf("[!] getHomeDir fail\n");
         return EXIT_FAILURE;
     }
-    strcat(path_cache, "/cache/");
-    strcat(path_log, "/logfile/logfile.txt");
+    snprintf(path_cache, PROXY_MAX_PATH, "%s/cache/", path_home);
+    snprintf(path_log, PROXY_MAX_PATH, "%s/logfile/logfile.txt", path_home);
 
     // receive an input till the input is 'bye'
     while(1){
@@ -270,30 +298,39 @@ int main(int argc, char* argv[]){
         // hash the input URL and find the cache with it
         sha1_hash(url_input, url_hash);
         res = find_primecache(path_cache, url_hash);
+        
+        // insert a slash delimiter at the 3rd index in the url_hash
+        insert_delim(url_hash, PROXY_MAX_URL, 3, '/');
 
+        // make a path for fullcache
+        snprintf(path_fullcache, PROXY_MAX_PATH ,"%s/%s", path_cache, url_hash);
+        
         switch(res){
+            // If the result is HIT case,
             case PROXY_HIT:
                 count_hit += 1;
-                memmove(url_hash + 3 + 1,
-                        url_hash + 3,
-                        PROXY_LEN_HASH - 3);
-                url_hash[3] = '/';
-                write_log(path_log, "Hit", url_hash, true);
-                write_log(path_log, "Hit", url_input, false);
+                write_log(path_log, "[Hit]", url_hash, true);
+                write_log(path_log, "[Hit]", url_input, false);
                 break;
-            
+
+            // If the result is MISS case,
             case PROXY_MISS:
                 count_miss += 1;
-                write_log(path_log, "Miss",url_input, true);
+                write_log(path_fullcache, "[TEST]", url_input, true);
+                write_log(path_log, "[Miss]",url_input, true);
                 break;
 
             default:
                 break;
         }
     }
+
+    // timer end
     time(&time_end);
-    snprintf(buf, BUFSIZ, " run time: %f sec. #request hit : %lu, miss : %lu", difftime(time_end, time_start), count_hit, count_miss);
-    write_log(path_log, "Terminated", buf, false);
+
+    // make a string for terminating the log and write it
+    snprintf(buf, BUFSIZ, " run time: %d sec. #request hit : %lu, miss : %lu", (int)difftime(time_end, time_start), count_hit, count_miss);
+    write_log(path_log, "[Terminated]", buf, false);
 
     return EXIT_SUCCESS;
 }
