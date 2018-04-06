@@ -88,7 +88,7 @@ int insert_delim(char *str, size_t size_max, size_t idx, char delim){
     size_t size = sizeof(char) * strlen(str);
 
     // check memory overflow or invalid index
-    if(size_max <= size || size_max <= idx)
+    if(size_max <= size || size <= idx)
         return EXIT_FAILURE;
 
     // insert the delimiter into the position idx in the str.
