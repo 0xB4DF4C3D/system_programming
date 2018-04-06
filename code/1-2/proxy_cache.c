@@ -164,8 +164,8 @@ int write_log(const char *path, const char *header, const char *body, bool time_
 /**
  * Find subcache(a back part of the hashed URL)
  * @param path_subcache A const char pointer to the path containing subcaches.
- * @param hash_back A const char pointer to be used as a subcache name.
- * @return [int] HIT:0, MISS:1, FAIL:-1
+ * @param hash_full A const char pointer to be used as a part of a cache.
+ * @return [int] HIT:PROXY_HIT, MISS:PROXY_MISS
  */
 int find_subcache(const char *path_subcache, const char *hash_full){
     struct dirent *pFile = NULL;
@@ -193,9 +193,8 @@ int find_subcache(const char *path_subcache, const char *hash_full){
 /**
  * Find primecache(A front part of the hashed URL).
  * @param path_primecache A const char pointer to the path containing primecaches.
- * @param hash_full A const char pointer to be used as a part of primecache name.
- * @todo Implement the HIT case.
- * @return [int] HIT:0, MISS:1, FAIL:-1
+ * @param hash_full A const char pointer to be used as a part of a cache.
+ * @return [int] HIT:PROXY_HIT, MISS:PROXY_MISS, FAIL:EXIT_FAILURE
  */
 int find_primecache(const char *path_primecache, const char *hash_full){
     struct dirent *pFile  = NULL;
