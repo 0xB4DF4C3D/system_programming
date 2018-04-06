@@ -276,10 +276,10 @@ int main(int argc, char* argv[]){
     // timer start
     time(&time_start);
 
-    // set full permission for the current process.
+    // set full permission for the current process
     umask(0);
 
-    // try getting current user's home path and concatenate cache and log paths
+    // try getting current user's home path and concatenate cache and log paths with it
     if(getHomeDir(path_home) == NULL){
         printf("[!] getHomeDir fail\n");
         return EXIT_FAILURE;
@@ -287,7 +287,7 @@ int main(int argc, char* argv[]){
     snprintf(path_cache, PROXY_MAX_PATH, "%s/cache", path_home);
     snprintf(path_log, PROXY_MAX_PATH, "%s/logfile/logfile.txt", path_home);
 
-    // receive an input till the input is 'bye'
+    // receive inputs till the input is 'bye'
     while(1){
         printf("input url> ");
         scanf("%s", url_input);
