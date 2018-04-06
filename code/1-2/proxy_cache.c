@@ -87,7 +87,7 @@ int insert_delim(char *str, size_t size_max, size_t idx, char delim){
     // size for checking is there a room to insert a delim
     size_t size = sizeof(char) * strlen(str);
 
-    // check memory overflow or invalid index
+    // check buffer overflow or invalid index
     if(size_max <= size || size <= idx)
         return EXIT_FAILURE;
 
