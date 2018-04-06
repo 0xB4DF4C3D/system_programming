@@ -94,7 +94,7 @@ int insert_delim(char *str, size_t size_max, size_t idx, char delim){
     // insert the delimiter into the position idx in the str.
     memmove(str + idx + 1,
             str + idx,
-            size - (idx + 1));
+            size - idx);
     str[idx] = delim;
 
     return EXIT_SUCCESS;
@@ -167,9 +167,14 @@ int write_log(const char *path, const char *header, const char *body, bool time_
  * @param hash_back A const char pointer to be used as a subcache name.
  * @return [int] HIT:0, MISS:1, FAIL:-1
  */
-int find_subcache(const char *path_subcache, const char *hash_back){
+int find_subcache(const char *path_subcache, const char *hash_full){
     struct dirent *pFile = NULL;
     DIR           *pDir  = NULL;
+
+    char hash_back[PROXY_LEN_HASH - PROXY_LEN_PREFIX + 1] = {0};
+
+    // extract the back part of the hash
+    strncpy(hash_back, hash_full + PROXY_LEN_PREFIX, PROXY_LEN_HASH - PROXY_LEN_PREFIX);
 
     // find the subcache while traversing the path
     pDir = opendir(path_subcache);
@@ -197,16 +202,14 @@ int find_primecache(const char *path_primecache, const char *hash_full){
     DIR           *pDir   = NULL;
     struct stat path_stat;
 
-    char hash_front[PROXY_LEN_PREFIX + 1]                 = {0};
-    char hash_back[PROXY_LEN_HASH - PROXY_LEN_PREFIX + 1] = {0};
+    char hash_front[PROXY_LEN_PREFIX + 1] = {0};
 
     char path_subcache[PROXY_MAX_PATH] = {0};
 
     int result = 0;
 
-    // divide the entire hash into two parts
+    // extract the front of the hash
     strncpy(hash_front, hash_full, PROXY_LEN_PREFIX);
-    strncpy(hash_back, hash_full + PROXY_LEN_PREFIX, PROXY_LEN_HASH - PROXY_LEN_PREFIX);
 
     // check whether the path of primecache exist or not
     pDir = opendir(path_primecache);
@@ -242,7 +245,7 @@ int find_primecache(const char *path_primecache, const char *hash_full){
         mkdir(path_subcache, S_IRWXU | S_IRWXG | S_IRWXO);
 
     // find the subcache in the path of the current primecache
-    result = find_subcache(path_subcache, hash_back);
+    result = find_subcache(path_subcache, hash_full);
 
     return result;
 }
@@ -282,7 +285,7 @@ int main(int argc, char* argv[]){
         printf("[!] getHomeDir fail\n");
         return EXIT_FAILURE;
     }
-    snprintf(path_cache, PROXY_MAX_PATH, "%s/cache/", path_home);
+    snprintf(path_cache, PROXY_MAX_PATH, "%s/cache", path_home);
     snprintf(path_log, PROXY_MAX_PATH, "%s/logfile/logfile.txt", path_home);
 
     // receive an input till the input is 'bye'
