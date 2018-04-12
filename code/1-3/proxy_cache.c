@@ -23,6 +23,7 @@
 
 #include <sys/stat.h>   // data returned by the stat() function
 #include <sys/types.h>  // data types
+#include <sys/wait.h>
 
 /**
  * Constants in proxy_cache to avoid magic numbers.
@@ -85,7 +86,7 @@ char *sha1_hash(char *input_url, char *hashed_url){
  */
 int insert_delim(char *str, size_t size_max, size_t idx, char delim){
     // size for checking is there a room to insert a delim
-    size_t size = sizeof(char) * strlen(str);
+    size_t size = sizeof(str);
 
     // check buffer overflow or invalid index
     if(size_max <= size || size <= idx)
@@ -121,7 +122,7 @@ int write_log(const char *path, const char *header, const char *body, bool time_
     char path_tmp[PROXY_MAX_PATH] = {0};
 
     struct tm *ltp = NULL; // for local time
-    time_t now;
+    time_t now = {0};
 
     // try opening the path with the append mode
     fp = fopen(path, "a+");
@@ -199,7 +200,7 @@ int find_subcache(const char *path_subcache, const char *hash_full){
 int find_primecache(const char *path_primecache, const char *hash_full){
     struct dirent *pFile  = NULL;
     DIR           *pDir   = NULL;
-    struct stat path_stat;
+    struct stat path_stat = {0};
 
     char hash_front[PROXY_LEN_PREFIX + 1] = {0};
 
@@ -250,6 +251,9 @@ int find_primecache(const char *path_primecache, const char *hash_full){
 }
 
 int sub_process(){
+
+    pid_t current_pid = getpid();
+
     // char arrays for handling a url
     char url_input[PROXY_MAX_URL] = {0};
     char url_hash[PROXY_LEN_HASH] = {0};
@@ -267,7 +271,7 @@ int sub_process(){
     size_t count_hit  = 0;
     size_t count_miss = 0;
 
-    time_t time_start, time_end;
+    time_t time_start = {0}, time_end = {0};
 
     // temporary buffer for misc
     char buf[BUFSIZ] = {0};
@@ -288,7 +292,7 @@ int sub_process(){
 
     // receive inputs till the input is 'bye'
     while(true){
-        printf("input url> ");
+        printf("[%d]input URL> ", current_pid);
         scanf("%s", url_input);
 
         // if input is 'bye' then break loop
@@ -336,23 +340,40 @@ int sub_process(){
     return EXIT_SUCCESS;
 }
 
-void main_process(){
-    pid_t pid = getpid();
+int main_process(){
+    pid_t current_pid = getpid();
+    pid_t child_pid = 0;
+    
+    int child_status = 0;
+
     char cmd_input[BUFSIZ] = {0};
 
+    int count_subprocess = 0;
+
+    time_t time_start = {0}, time_end = {0};
+
     while(true){
-        printf("[%d]input CMD> ", pid); 
+        printf("[%d]input CMD> ", current_pid); 
         scanf("%s", cmd_input);
 
-        printf("cmd_input : %s\n", cmd_input);
         if(strcmp(cmd_input, "connect") == 0){
-            printf("CONNECT!!!\n");
+            if((child_pid = fork()) < 0){
+                fprintf(stderr, "[!] make sub_process fail\n"); 
+            } else if(child_pid == 0){
+                sub_process();
+            } else {
+                count_subprocess += 1;
+                wait(&child_status);
+            }
         } else if(strcmp(cmd_input, "quit") == 0){
-            printf("QUIT!!!\n");
+            break;
         } else {
-            printf("WTF!!!!\n");
+            fprintf(stderr, "[!] Invalid command \n");
+            continue;
         }
     }
+
+    return EXIT_SUCCESS;
 }
 
 int main(int argc, char* argv[]){
@@ -360,4 +381,3 @@ int main(int argc, char* argv[]){
 
     return EXIT_SUCCESS;
 }
-
