@@ -174,7 +174,7 @@ int write_log(const char *path, const char *header, const char *body, bool time_
 
     if(chmod(path, S_IRWXU | S_IRWXG | S_IRWXO) == -1){
         fprintf(stderr, "[!] chmod fail\n");
-    
+
         fclose(fp);
         free(msg_total);
         return EXIT_FAILURE;
@@ -192,10 +192,10 @@ int write_log(const char *path, const char *header, const char *body, bool time_
  * @return [int] HIT:PROXY_HIT, MISS:PROXY_MISS
  */
 int find_subcache(const char *path_subcache, const char *hash_full){
-    struct dirent *pFile = NULL;
-    DIR           *pDir  = NULL;
-
     char hash_back[PROXY_LEN_HASH - PROXY_LEN_PREFIX + 1] = {0};
+
+    DIR           *pDir  = NULL;
+    struct dirent *pFile = NULL;
 
     // extract the back part of the hash
     strncpy(hash_back, hash_full + PROXY_LEN_PREFIX, PROXY_LEN_HASH - PROXY_LEN_PREFIX);
@@ -223,8 +223,8 @@ int find_subcache(const char *path_subcache, const char *hash_full){
  * @return [int] HIT:PROXY_HIT, MISS:PROXY_MISS, FAIL:EXIT_FAILURE
  */
 int find_primecache(const char *path_primecache, const char *hash_full){
-    struct dirent *pFile  = NULL;
     DIR           *pDir   = NULL;
+    struct dirent *pFile  = NULL;
     struct stat path_stat = {0};
 
     char hash_front[PROXY_LEN_PREFIX + 1] = {0};
@@ -320,13 +320,13 @@ int sub_process(const char *path_log, const char *path_cache){
         // hash the input URL and find the cache with it
         sha1_hash(url_input, url_hash);
         res = find_primecache(path_cache, url_hash);
-        
+
         // insert a slash delimiter at the 3rd index in the url_hash
         insert_delim(url_hash, PROXY_MAX_URL, 3, '/');
 
         // make a path for fullcache
         snprintf(path_fullcache, PROXY_MAX_PATH ,"%s/%s", path_cache, url_hash);
-        
+
         switch(res){
             // If the result is HIT case,
             case PROXY_HIT:
@@ -335,7 +335,7 @@ int sub_process(const char *path_log, const char *path_cache){
                 write_log(path_log, "[Hit]", url_input, false);
                 break;
 
-            // If the result is MISS case,
+                // If the result is MISS case,
             case PROXY_MISS:
                 count_miss += 1;
                 write_log(path_fullcache, "[TEST]", url_input, true);
@@ -358,21 +358,28 @@ int sub_process(const char *path_log, const char *path_cache){
 }
 
 int main_process(){
+    // pid numbers of processes
     pid_t current_pid = getpid();
     pid_t child_pid = 0;
-    
+
+    // status of a child process
     int child_status = 0;
 
+    // char arrays for handling paths
     char path_home[PROXY_MAX_PATH]  = {0};
     char path_log[PROXY_MAX_PATH]   = {0};
     char path_cache[PROXY_MAX_PATH] = {0};
 
+    // command input by user
     char cmd_input[BUFSIZ] = {0};
 
+    // counter for number of subprocesses
     size_t count_subprocess = 0;
 
+    // time structs for logging elpased time
     time_t time_start = {0}, time_end = {0};
 
+    // temporary buffer for misc
     char buf[BUFSIZ] = {0};
 
     time(&time_start);
@@ -385,24 +392,28 @@ int main_process(){
     snprintf(path_cache, PROXY_MAX_PATH, "%s/cache", path_home);
     snprintf(path_log, PROXY_MAX_PATH, "%s/logfile/logfile.txt", path_home);
 
+    // receive inputs till the input is 'quit'
     while(true){
         printf("[%d]input CMD> ", current_pid); 
         fgets(cmd_input, BUFSIZ, stdin);
         cmd_input[strlen(cmd_input)-1] = '\0';
 
+        // if input is 'connect', 
         if(strcmp(cmd_input, "connect") == 0){
-            if((child_pid = fork()) < 0){
-                fprintf(stderr, "[!] make sub_process fail\n"); 
-            } else if(child_pid == 0){
+            // then make a child process
+            if((child_pid = fork()) < 0){ // if it goes fail,
+                fprintf(stderr, "[!] make sub_process fail\n");
+                continue;
+            } else if(child_pid == 0){ // in a child process
                 sub_process(path_log, path_cache);
                 return EXIT_SUCCESS;
-            } else {
+            } else { // in an original process
                 count_subprocess += 1;
                 wait(&child_status);
             }
-        } else if(strcmp(cmd_input, "quit") == 0){
-            break;
-        } else {
+        } else if(strcmp(cmd_input, "quit") == 0){ // if input is 'quit'
+            break; // then escape loop
+        } else { // if input is not valid,
             fprintf(stderr, "[!] Invalid command \n");
             continue;
         }
@@ -417,4 +428,3 @@ int main_process(){
 
     return EXIT_SUCCESS;
 }
-
