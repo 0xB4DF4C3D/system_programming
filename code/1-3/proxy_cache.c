@@ -133,7 +133,7 @@ int write_log(const char *path, const char *header, const char *body, bool time_
             mkdir(dirname(path_tmp), S_IRWXU | S_IRWXG | S_IRWXO);       
             fp = fopen(path, "a+");
         } else {
-            printf("[!] %s : %s\n", path, strerror(errno));
+            fprintf(stderr, "[!] %s : %s\n", path, strerror(errno));
             return EXIT_FAILURE;
         }
     }
@@ -231,8 +231,8 @@ int find_primecache(const char *path_primecache, const char *hash_full){
             if(S_ISDIR(path_stat.st_mode)){
                 break;
             }else{ // if the file was regular, then something's wrong in the cache directory
-                printf("[!] find_primecache fail\n");
-                printf("[+] the cache directory is corrupted\n");
+                fprintf(stderr, "[!] find_primecache fail\n");
+                fprintf(stderr, "[+] the cache directory is corrupted\n");
                 return EXIT_FAILURE;
             }
         }
@@ -280,7 +280,7 @@ int sub_process(){
 
     // try getting current user's home path and concatenate cache and log paths with it
     if(getHomeDir(path_home) == NULL){
-        printf("[!] getHomeDir fail\n");
+        fprintf(stderr, "[!] getHomeDir fail\n");
         return EXIT_FAILURE;
     }
     snprintf(path_cache, PROXY_MAX_PATH, "%s/cache", path_home);
