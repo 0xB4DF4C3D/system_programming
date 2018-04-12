@@ -309,9 +309,6 @@ int sub_process(const char *path_log, const char *path_cache){
     // timer start
     time(&time_start);
 
-    // set full permission for the current process
-    umask(0);
-
     // receive inputs till the input is 'bye'
     while(true){
         printf("[%d]input URL> ", current_pid);
@@ -392,7 +389,11 @@ int main_process(){
     // temporary buffer for misc
     char buf[BUFSIZ] = {0};
 
+    // timer start
     time(&time_start);
+
+    // set full permission for the current process
+    umask(0);
 
     // try getting current user's home path and concatenate cache and log paths with it
     if(getHomeDir(path_home) == NULL){
