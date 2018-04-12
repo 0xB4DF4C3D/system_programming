@@ -250,7 +250,7 @@ int find_primecache(const char *path_primecache, const char *hash_full){
     return result;
 }
 
-int sub_process(){
+int sub_process(const char *path_log, const char *path_cache){
 
     pid_t current_pid = getpid();
 
@@ -259,10 +259,7 @@ int sub_process(){
     char url_hash[PROXY_LEN_HASH] = {0};
 
     // char arrays for handling paths
-    char path_home[PROXY_MAX_PATH]      = {0};
-    char path_cache[PROXY_MAX_PATH]     = {0};
     char path_fullcache[PROXY_MAX_PATH] = {0};
-    char path_log[PROXY_MAX_PATH]       = {0};
 
     // result for finding cache
     int res = 0;
@@ -282,13 +279,6 @@ int sub_process(){
     // set full permission for the current process
     umask(0);
 
-    // try getting current user's home path and concatenate cache and log paths with it
-    if(getHomeDir(path_home) == NULL){
-        fprintf(stderr, "[!] getHomeDir fail\n");
-        return EXIT_FAILURE;
-    }
-    snprintf(path_cache, PROXY_MAX_PATH, "%s/cache", path_home);
-    snprintf(path_log, PROXY_MAX_PATH, "%s/logfile/logfile.txt", path_home);
 
     // receive inputs till the input is 'bye'
     while(true){
@@ -346,11 +336,27 @@ int main_process(){
     
     int child_status = 0;
 
+    char path_home[PROXY_MAX_PATH]  = {0};
+    char path_log[PROXY_MAX_PATH]   = {0};
+    char path_cache[PROXY_MAX_PATH] = {0};
+
     char cmd_input[BUFSIZ] = {0};
 
-    int count_subprocess = 0;
+    size_t count_subprocess = 0;
 
     time_t time_start = {0}, time_end = {0};
+
+    char buf[BUFSIZ] = {0};
+
+    time(&time_start);
+
+    // try getting current user's home path and concatenate cache and log paths with it
+    if(getHomeDir(path_home) == NULL){
+        fprintf(stderr, "[!] getHomeDir fail\n");
+        return EXIT_FAILURE;
+    }
+    snprintf(path_cache, PROXY_MAX_PATH, "%s/cache", path_home);
+    snprintf(path_log, PROXY_MAX_PATH, "%s/logfile/logfile.txt", path_home);
 
     while(true){
         printf("[%d]input CMD> ", current_pid); 
@@ -360,7 +366,8 @@ int main_process(){
             if((child_pid = fork()) < 0){
                 fprintf(stderr, "[!] make sub_process fail\n"); 
             } else if(child_pid == 0){
-                sub_process();
+                sub_process(path_log, path_cache);
+                return EXIT_SUCCESS;
             } else {
                 count_subprocess += 1;
                 wait(&child_status);
@@ -372,6 +379,13 @@ int main_process(){
             continue;
         }
     }
+
+    // timer end
+    time(&time_end);
+
+    // make a string for terminating the log and write it
+    snprintf(buf, BUFSIZ, " run time: %d sec. #sub process: %lu\n", (int)difftime(time_end, time_start), count_subprocess);
+    write_log(path_log, "**SERVER** [Terminated]", buf, false);
 
     return EXIT_SUCCESS;
 }
