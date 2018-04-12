@@ -86,7 +86,7 @@ char *sha1_hash(char *input_url, char *hashed_url){
  */
 int insert_delim(char *str, size_t size_max, size_t idx, char delim){
     // size for checking is there a room to insert a delim
-    size_t size = sizeof(str);
+    size_t size = strlen(str);
 
     // check buffer overflow or invalid index
     if(size_max <= size || size <= idx)
@@ -140,7 +140,7 @@ int write_log(const char *path, const char *header, const char *body, bool time_
     }
 
     // assign new memory block to msg_total by enough space
-    msg_total_size = sizeof(char) * (strlen(header) + strlen(body) + 32);
+    msg_total_size = strlen(header) + strlen(body) + 32;
     msg_total = (char*)malloc(msg_total_size);
 
     // if time flag is true
@@ -156,8 +156,16 @@ int write_log(const char *path, const char *header, const char *body, bool time_
 
     // write message to the path
     fwrite(msg_total, 1, strlen(msg_total), fp);
-    fclose(fp);
 
+    if(chmod(path, S_IRWXU | S_IRWXG | S_IRWXO) == -1){
+        fprintf(stderr, "[!] chmod fail\n");
+    
+        fclose(fp);
+        free(msg_total);
+        return EXIT_FAILURE;
+    }
+
+    fclose(fp);
     free(msg_total);
     return EXIT_SUCCESS;
 }
@@ -179,9 +187,11 @@ int find_subcache(const char *path_subcache, const char *hash_full){
 
     // find the subcache while traversing the path
     pDir = opendir(path_subcache);
-    for(pFile=readdir(pDir); pFile; pFile=readdir(pDir))
-        if(strcmp(hash_back, pFile->d_name) == 0)
+    for(pFile=readdir(pDir); pFile; pFile=readdir(pDir)){
+        if(strcmp(hash_back, pFile->d_name) == 0){
             break;
+        }
+    }
     closedir(pDir);
 
     if(pFile == NULL){  // for MISS case
@@ -384,7 +394,7 @@ int main_process(){
     time(&time_end);
 
     // make a string for terminating the log and write it
-    snprintf(buf, BUFSIZ, " run time: %d sec. #sub process: %lu\n", (int)difftime(time_end, time_start), count_subprocess);
+    snprintf(buf, BUFSIZ, " run time: %d sec. #sub process: %lu", (int)difftime(time_end, time_start), count_subprocess);
     write_log(path_log, "**SERVER** [Terminated]", buf, false);
 
     return EXIT_SUCCESS;
