@@ -275,6 +275,12 @@ int find_primecache(const char *path_primecache, const char *hash_full){
     return result;
 }
 
+/**
+ * A subprocess running in a child process.
+ * @param path_log The path containing a logfile.
+ * @param path_cache The path containing primecaches.
+ * @return [int] Success:EXIT_SUCCESS
+ */
 int sub_process(const char *path_log, const char *path_cache){
 
     // pid number for current process
@@ -357,6 +363,10 @@ int sub_process(const char *path_log, const char *path_cache){
     return EXIT_SUCCESS;
 }
 
+/**
+ * A main process running a subprocess
+ * @return [int] Success:EXIT_SUCCESS, Fail:EXIT_FAILURE
+ */
 int main_process(){
     // pid numbers of processes
     pid_t current_pid = getpid();
