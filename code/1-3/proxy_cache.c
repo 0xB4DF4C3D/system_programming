@@ -38,8 +38,25 @@ typedef enum {
     PROXY_MAX_PATH   = 4096, ///< A maximum length of a path.
 
     PROXY_HIT  = 8000, ///< An arbitrary magic number for the HIT case.
-    PROXY_MISS = 8001  ///< An arbitrary magic number for the MISS case.
+    PROXY_MISS = 8001, ///< An arbitrary magic number for the MISS case.
 } Proxy_constants;
+
+char *getHomeDir(char *home);
+char *sha1_hash(char *input_url, char *hashed_url);
+int insert_delim(char *str, size_t size_max, size_t idx, char delim);
+int write_log(const char *path, const char *header, const char *body, bool time_);
+int find_subcache(const char *path_subcache, const char *hash_full);
+int find_primecache(const char *path_primecache, const char *hash_full);
+int sub_process(const char *path_log, const char *path_cache);
+int main_process();
+
+int main(int argc, char* argv[]){
+
+    // start a main process
+    main_process();
+
+    return EXIT_SUCCESS;
+}
 
 /**
  * A given function for getting the home path.
@@ -112,23 +129,21 @@ int insert_delim(char *str, size_t size_max, size_t idx, char delim){
 int write_log(const char *path, const char *header, const char *body, bool time_){
     FILE *fp        = NULL;
 
-    // 32 is a moderately large value to save time information
-    char time_str[32] = {0};
+    // a string for temporary path(the case for absence of the log path)
+    char path_tmp[PROXY_MAX_PATH] = {0};
 
     char *msg_total       = NULL;
     size_t msg_total_size = 0;
 
-    // a string for temporary path(the case for absence of the log path)
-    char path_tmp[PROXY_MAX_PATH] = {0};
-
+    // 32 is a moderately large value to save time information
     struct tm *ltp = NULL; // for local time
     time_t now = {0};
+    char time_str[32] = {0};
 
     // try opening the path with the append mode
     fp = fopen(path, "a+");
     if(fp == NULL){ // when the try went fail
         if(errno == ENOENT){ // if its reason is absence of the log path,
-
             // make the path, and try again
             strncpy(path_tmp, path, strlen(path));
             mkdir(dirname(path_tmp), S_IRWXU | S_IRWXG | S_IRWXO);       
@@ -262,13 +277,14 @@ int find_primecache(const char *path_primecache, const char *hash_full){
 
 int sub_process(const char *path_log, const char *path_cache){
 
+    // pid number for current process
     pid_t current_pid = getpid();
 
     // char arrays for handling a url
     char url_input[PROXY_MAX_URL] = {0};
     char url_hash[PROXY_LEN_HASH] = {0};
 
-    // char arrays for handling paths
+    // char arrays for fullcache
     char path_fullcache[PROXY_MAX_PATH] = {0};
 
     // result for finding cache
@@ -278,6 +294,7 @@ int sub_process(const char *path_log, const char *path_cache){
     size_t count_hit  = 0;
     size_t count_miss = 0;
 
+    // time structs for logging elapsed time
     time_t time_start = {0}, time_end = {0};
 
     // temporary buffer for misc
@@ -289,11 +306,11 @@ int sub_process(const char *path_log, const char *path_cache){
     // set full permission for the current process
     umask(0);
 
-
     // receive inputs till the input is 'bye'
     while(true){
         printf("[%d]input URL> ", current_pid);
-        scanf("%s", url_input);
+        fgets(url_input, PROXY_MAX_URL, stdin);
+        url_input[strlen(url_input)-1] = '\0';
 
         // if input is 'bye' then break loop
         if(strcmp("bye", url_input) == 0){
@@ -370,7 +387,8 @@ int main_process(){
 
     while(true){
         printf("[%d]input CMD> ", current_pid); 
-        scanf("%s", cmd_input);
+        fgets(cmd_input, BUFSIZ, stdin);
+        cmd_input[strlen(cmd_input)-1] = '\0';
 
         if(strcmp(cmd_input, "connect") == 0){
             if((child_pid = fork()) < 0){
@@ -400,8 +418,3 @@ int main_process(){
     return EXIT_SUCCESS;
 }
 
-int main(int argc, char* argv[]){
-    main_process();
-
-    return EXIT_SUCCESS;
-}
