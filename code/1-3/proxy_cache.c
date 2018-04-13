@@ -112,7 +112,7 @@ int insert_delim(char *str, size_t size_max, size_t idx, char delim){
     // insert the delimiter into the position idx in the str.
     memmove(str + idx + 1,
             str + idx,
-            size - idx);
+            size - idx + 1);
     str[idx] = delim;
 
     return EXIT_SUCCESS;
