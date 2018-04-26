@@ -7,6 +7,9 @@
  * @date Thu Apr 26 10:12:44 KST 2018
  */
 
+#include <openssl/sha.h> // to use SHA1
+#include <arpa/inet.h>   // for socket programming 
+
 #include <dirent.h>      // format of directory entries
 #include <errno.h>       // system error numbers
 #include <fcntl.h>       // file control options
@@ -20,15 +23,12 @@
 #include <time.h>
 #include <unistd.h>      // standard symbolic constants and types
 
-#include <openssl/sha.h> // to use SHA1
-#include <arpa/inet.h>   // 
-
 #include <sys/stat.h>    // data returned by the stat() function
 #include <sys/types.h>   // data types
 #include <sys/wait.h>
 
 /**
- * Constants in proxy_cache to avoid magic numbers.
+ * Constant values for files relevanting proxy to avoid magic number.
  * @see MAX_URL   : See https://stackoverflow.com/a/417184/7899226
  * @see MAN_PATH  : Not official but refer to the linux/limits.h and wikipedia.
  */
@@ -42,7 +42,7 @@ typedef enum {
     PROXY_HIT  = 8000, ///< An arbitrary magic number for the HIT case.
     PROXY_MISS = 8001, ///< An arbitrary magic number for the MISS case.
 
-    PROXY_PORTNO = 40000
+    PROXY_PORTNO = 38078 ///< A given port number for me.
 } Proxy_constants;
 
 char *getHomeDir(char *home);
@@ -51,7 +51,7 @@ int insert_delim(char *str, size_t size_max, size_t idx, char delim);
 int write_log(const char *path, const char *header, const char *body, bool time_, bool pid_);
 int find_subcache(const char *path_subcache, const char *hash_full);
 int find_primecache(const char *path_primecache, const char *hash_full);
-int sub_process(const char *path_log, const char *path_cache, int client_fd);
+int sub_process(const char *path_log, const char *path_cache, int fd_client);
 int main_process();
 
 /**
@@ -74,27 +74,30 @@ int main(int argc, char* argv[]){
  * @return [int] Success:EXIT_SUCCESS, Fail:EXIT_FAILURE
  */
 int main_process(){
-    // a pid number of process
-    pid_t child_pid = 0;
 
+    // variables for address
+    struct sockaddr_in addr_server, addr_client;
+    memset(&addr_server, 0, sizeof(addr_server));
+    memset(&addr_client, 0, sizeof(addr_client));
+    socklen_t addr_len = 0;
+
+    // temporary buffer for misc
+    char buf[BUFSIZ] = {0};
+
+    // counter for number of subprocesses
+    size_t count_subprocess = 0;
+
+    // file descriptors
+    int fd_socket = 0, fd_client = 0;
+    
     // char arrays for handling paths
     char path_home[PROXY_MAX_PATH]  = {0};
     char path_log[PROXY_MAX_PATH]   = {0};
     char path_cache[PROXY_MAX_PATH] = {0};
 
-    // counter for number of subprocesses
-    size_t count_subprocess = 0;
+    // a pid number of process
+    pid_t pid_child = 0;
 
-    // temporary buffer for misc
-    char buf[BUFSIZ] = {0};
-
-    struct sockaddr_in server_addr, client_addr;
-    memset(&server_addr, 0, sizeof(server_addr));
-    memset(&client_addr, 0, sizeof(client_addr));
-
-    int socket_fd = 0, client_fd = 0;
-    socklen_t len_socket = 0;
-    
     // set full permission for the current process
     umask(0);
 
@@ -106,55 +109,64 @@ int main_process(){
     snprintf(path_cache, PROXY_MAX_PATH, "%s/cache", path_home);
     snprintf(path_log, PROXY_MAX_PATH, "%s/logfile/logfile.txt", path_home);
 
-    if((socket_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0){
+    // try open a stream socket
+    if((fd_socket = socket(PF_INET, SOCK_STREAM, 0)) < 0){
         fprintf(stderr, "[!](server) can't open stream socket\n");
         exit(EXIT_FAILURE);
     }
 
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(PROXY_PORTNO);
-    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    // initialize addr_server
+    addr_server.sin_family = AF_INET;
+    addr_server.sin_port = htons(PROXY_PORTNO);
+    addr_server.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    if(bind(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0){
+    // bind fd_socket to addr_server
+    if(bind(fd_socket, (struct sockaddr *)&addr_server, sizeof(addr_server)) < 0){
         fprintf(stderr, "[!](server) can't bind local address\n");
-        close(socket_fd);
+        close(fd_socket);
         exit(EXIT_FAILURE);
     }
 
-    listen(socket_fd, 5);
+    // listen for connections on a socket
+    listen(fd_socket, 5);
+
+    // call handler_child when SIGCHLD occurs
     signal(SIGCHLD, handler_child);
 
+    // interact with the client
     while(true){
-        memset(&client_addr, 0, sizeof(client_addr));
-        len_socket = sizeof(client_addr);
-        client_fd = accept(socket_fd, (struct sockaddr *)&client_addr, &len_socket); 
-        inet_ntop(AF_INET, &client_addr.sin_addr, buf, len_socket);
-
-        printf("[%s : %d] client was connected\n", buf, ntohs(client_addr.sin_port));
-
-        if(client_fd < 0){
+        // receive data for the client address
+        memset(&addr_client, 0, sizeof(addr_client));
+        addr_len = sizeof(addr_client);
+        fd_client = accept(fd_socket, (struct sockaddr *)&addr_client, &addr_len); 
+        inet_ntop(AF_INET, &addr_client.sin_addr, buf, addr_len);
+        if(fd_client < 0){
             fprintf(stderr, "[!](server) accept failed\n");
-            close(client_fd);
-            close(socket_fd);
+            close(fd_client);
+            close(fd_socket);
             exit(EXIT_FAILURE);
         }
 
-        child_pid = fork();
-        if(child_pid == -1){
-            close(client_fd);
-            close(socket_fd);
-            exit(EXIT_FAILURE);
-        } else if (child_pid == 0){
-            sub_process(path_log, path_cache, client_fd);
-            printf("[%s : %d] client was disconnected\n", buf, ntohs(client_addr.sin_port));
+        printf("[%s : %d] client was connected\n", buf, ntohs(addr_client.sin_port));
 
-            close(client_fd);
+        // fork a process
+        pid_child = fork();
+        if(pid_child == -1){
+            close(fd_client);
+            close(fd_socket);
+            exit(EXIT_FAILURE);
+        } else if (pid_child == 0){
+            // call the sub_process
+            sub_process(path_log, path_cache, fd_client);
+
+            printf("[%s : %d] client was disconnected\n", buf, ntohs(addr_client.sin_port));
+            close(fd_client);
             exit(EXIT_SUCCESS);
         }
-        close(client_fd);
+        close(fd_client);
     }
 
-    close(socket_fd);
+    close(fd_socket);
     return EXIT_SUCCESS;
 }
 
@@ -162,10 +174,10 @@ int main_process(){
  * A subprocess running in a child process.
  * @param path_log The path containing a logfile.
  * @param path_cache The path containing primecaches.
- * @param client_fd The client file descriptor.
+ * @param fd_client The client file descriptor.
  * @return [int] Success:EXIT_SUCCESS
  */
-int sub_process(const char *path_log, const char *path_cache, int client_fd){
+int sub_process(const char *path_log, const char *path_cache, int fd_client){
 
     // char arrays for handling a url
     char url_input[PROXY_MAX_URL] = {0};
@@ -193,7 +205,7 @@ int sub_process(const char *path_log, const char *path_cache, int client_fd){
     time(&time_start);
 
     // receive inputs till the input is 'bye'
-    while((len_out = read(client_fd, url_input, BUFSIZ)) > 0){
+    while((len_out = read(fd_client, url_input, BUFSIZ)) > 0){
 
         if(!strncmp(url_input, "bye", 3)) break;
 
@@ -214,7 +226,7 @@ int sub_process(const char *path_log, const char *path_cache, int client_fd){
                 write_log(path_log, "[HIT]", url_hash, true, true);
                 write_log(path_log, "[HIT]", url_input, false, false);
 
-                write(client_fd, "HIT", 3);
+                write(fd_client, "HIT", 3);
                 break;
 
                 // If the result is MISS case,
@@ -223,7 +235,7 @@ int sub_process(const char *path_log, const char *path_cache, int client_fd){
                 write_log(path_fullcache, "[TEST]", url_input, true, false);
                 write_log(path_log, "[MISS]", url_input, true, true);
 
-                write(client_fd, "MISS", 4);
+                write(fd_client, "MISS", 4);
                 break;
 
             default:
@@ -348,6 +360,7 @@ int write_log(const char *path, const char *header, const char *body, bool time_
         strftime(str_time, 32, " - [%Y/%m/%d, %T]", ltp);
     }
 
+    // if pid flag is true
     if(pid_){
         snprintf(str_pid, 32, " ServerPID : %d | ", pid_current);
     }

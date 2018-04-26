@@ -28,27 +28,27 @@ int main(){
     // buffer for URL inputted by user or result from server
     char buf[BUFSIZ] = {0};
 
-    // struct for server address
-    struct sockaddr_in server_addr;
-    memset(&server_addr, 0, sizeof(server_addr));
+    // variables for address
+    struct sockaddr_in addr_server;
+    memset(&addr_server, 0, sizeof(addr_server));
+    socklen_t addr_len = 0;
 
-    // variables for socket
-    int socket_fd        = 0;
-    socklen_t len_socket = 0;
+    // a file descriptor
+    int fd_socket = 0;
 
     // try open a stream socket
-    if((socket_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0){
+    if((fd_socket = socket(PF_INET, SOCK_STREAM, 0)) < 0){
         fprintf(stderr, "[!](client) can't open stream socket\n");    
         exit(EXIT_FAILURE);
     }
 
-	// initialize server_addr
-    server_addr.sin_family = AF_INET;
-    inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr);
-    server_addr.sin_port = htons(PROXY_PORTNO);
+	// initialize addr_server
+    addr_server.sin_family = AF_INET;
+    inet_pton(AF_INET, "127.0.0.1", &addr_server.sin_addr);
+    addr_server.sin_port = htons(PROXY_PORTNO);
 
-	// connect socket_fd to server_addr
-    if(connect(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0){
+	// connect fd_socket to addr_server
+    if(connect(fd_socket, (struct sockaddr *)&addr_server, sizeof(addr_server)) < 0){
         fprintf(stderr, "[!](client) can't connect\n");
         exit(EXIT_FAILURE);
     }
@@ -57,23 +57,23 @@ int main(){
     while(true){
         // input url by the user without a linebreak
         printf("input url > "); fflush(stdout);
-        len_socket = read(STDIN_FILENO, buf, sizeof(buf));
+        addr_len = read(STDIN_FILENO, buf, sizeof(buf));
         buf[strlen(buf)-1] = '\0';
 
         // if the url is 'bye' then break
         if(!strncmp(buf, "bye", 3)) break;
 
         // send the url to the server
-        if(write(socket_fd, buf, strlen(buf)) > 0){
+        if(write(fd_socket, buf, strlen(buf)) > 0){
             // receive the result from the server
-            if((len_socket = read(socket_fd, buf, sizeof(buf))) > 0){
-                write(STDOUT_FILENO, buf, len_socket);
+            if((addr_len = read(fd_socket, buf, sizeof(buf))) > 0){
+                write(STDOUT_FILENO, buf, addr_len);
                 write(STDOUT_FILENO, "\n", 1);
                 memset(&buf, 0, sizeof(buf));
             }
         }
     }
 
-    close(socket_fd);
+    close(fd_socket);
     return EXIT_SUCCESS;
 }
