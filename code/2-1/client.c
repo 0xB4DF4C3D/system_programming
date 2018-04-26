@@ -64,7 +64,7 @@ int main(){
         if(!strncmp(buf, "bye", 3)) break;
 
         // send the url to the server
-        if(write(fd_socket, buf, strlen(buf)) > 0){
+        if(write(fd_socket, buf, strlen(buf)+1) > 0){
             // receive the result from the server
             if((addr_len = read(fd_socket, buf, sizeof(buf))) > 0){
                 write(STDOUT_FILENO, buf, addr_len);
