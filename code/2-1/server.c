@@ -70,16 +70,17 @@ int main(int argc, char* argv[]){
 }
 
 /**
- * A main process running a subprocess
+ * A main process running a subprocess.
+ * It also handles stream between server and client.
  * @return [int] Success:EXIT_SUCCESS, Fail:EXIT_FAILURE
  */
 int main_process(){
 
     // variables for address
+    socklen_t addr_len = 0;
     struct sockaddr_in addr_server, addr_client;
     memset(&addr_server, 0, sizeof(addr_server));
     memset(&addr_client, 0, sizeof(addr_client));
-    socklen_t addr_len = 0;
 
     // temporary buffer for misc
     char buf[BUFSIZ] = {0};
@@ -91,9 +92,9 @@ int main_process(){
     int fd_socket = 0, fd_client = 0;
     
     // char arrays for handling paths
+    char path_cache[PROXY_MAX_PATH] = {0};
     char path_home[PROXY_MAX_PATH]  = {0};
     char path_log[PROXY_MAX_PATH]   = {0};
-    char path_cache[PROXY_MAX_PATH] = {0};
 
     // a pid number of process
     pid_t pid_child = 0;
@@ -172,6 +173,7 @@ int main_process(){
 
 /**
  * A subprocess running in a child process.
+ * It handles caches practically.
  * @param path_log The path containing a logfile.
  * @param path_cache The path containing primecaches.
  * @param fd_client The client file descriptor.
@@ -179,9 +181,14 @@ int main_process(){
  */
 int sub_process(const char *path_log, const char *path_cache, int fd_client){
 
-    // char arrays for handling a url
-    char url_input[PROXY_MAX_URL] = {0};
-    char url_hash[PROXY_LEN_HASH] = {0};
+    // temporary buffer for misc
+    char buf[BUFSIZ] = {0};
+
+    // counter for HIT and MISS cases
+    size_t count_hit  = 0;
+    size_t count_miss = 0;
+
+    int len_out = 0;
 
     // char arrays for fullcache
     char path_fullcache[PROXY_MAX_PATH] = {0};
@@ -189,17 +196,12 @@ int sub_process(const char *path_log, const char *path_cache, int fd_client){
     // result for finding cache
     int res = 0;
 
-    // counter for HIT and MISS cases
-    size_t count_hit  = 0;
-    size_t count_miss = 0;
-
     // time structs for logging elapsed time
     time_t time_start = {0}, time_end = {0};
 
-    // temporary buffer for misc
-    char buf[BUFSIZ] = {0};
-
-    int len_out = 0;
+    // char arrays for handling a url
+    char url_hash[PROXY_LEN_HASH] = {0};
+    char url_input[PROXY_MAX_URL] = {0};
 
     // timer start
     time(&time_start);
@@ -229,7 +231,7 @@ int sub_process(const char *path_log, const char *path_cache, int fd_client){
                 write(fd_client, "HIT", 3);
                 break;
 
-                // If the result is MISS case,
+            // If the result is MISS case,
             case PROXY_MISS:
                 count_miss += 1;
                 write_log(path_fullcache, "[TEST]", url_input, true, false);
@@ -324,19 +326,20 @@ int insert_delim(char *str, size_t size_max, size_t idx, char delim){
 int write_log(const char *path, const char *header, const char *body, bool time_, bool pid_){
     FILE *fp        = NULL;
 
+    char *msg_total       = NULL;
+    size_t msg_total_size = 0;
+
     // a string for temporary path(the case for absence of the log path)
     char path_tmp[PROXY_MAX_PATH] = {0};
 
-    char *msg_total       = NULL;
-    size_t msg_total_size = 0;
+    pid_t pid_current = getpid();
+
+    char str_pid[32]  = {0};
+    char str_time[32] = {0};
 
     // 32 is a moderately large value to save time information
     struct tm *ltp = NULL; // for local time
     time_t now = {0};
-    char str_time[32] = {0};
-    char str_pid[32] = {0};
-
-    pid_t pid_current = getpid();
 
     // try opening the path with the append mode
     fp = fopen(path, "a+");
@@ -426,13 +429,12 @@ int find_subcache(const char *path_subcache, const char *hash_full){
  * @return [int] HIT:PROXY_HIT, MISS:PROXY_MISS, FAIL:EXIT_FAILURE
  */
 int find_primecache(const char *path_primecache, const char *hash_full){
-    DIR           *pDir   = NULL;
-    struct dirent *pFile  = NULL;
-    struct stat path_stat = {0};
-
     char hash_front[PROXY_LEN_PREFIX + 1] = {0};
 
+    DIR *pDir                          = NULL;
     char path_subcache[PROXY_MAX_PATH] = {0};
+    struct dirent *pFile               = NULL;
+    struct stat path_stat              = {0};
 
     int result = 0;
 
