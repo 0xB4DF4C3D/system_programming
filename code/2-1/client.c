@@ -33,7 +33,7 @@ int main(){
     memset(&addr_server, 0, sizeof(addr_server));
     socklen_t addr_len = 0;
 
-    // a file descriptor
+    // a file descriptor for socket
     int fd_socket = 0;
 
     // try open a stream socket
@@ -42,12 +42,12 @@ int main(){
         exit(EXIT_FAILURE);
     }
 
-	// initialize addr_server
+    // initialize addr_server
     addr_server.sin_family = AF_INET;
     inet_pton(AF_INET, "127.0.0.1", &addr_server.sin_addr);
     addr_server.sin_port = htons(PROXY_PORTNO);
 
-	// connect fd_socket to addr_server
+    // connect fd_socket to addr_server
     if(connect(fd_socket, (struct sockaddr *)&addr_server, sizeof(addr_server)) < 0){
         fprintf(stderr, "[!](client) can't connect\n");
         exit(EXIT_FAILURE);
