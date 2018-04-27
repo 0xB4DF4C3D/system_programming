@@ -113,7 +113,7 @@ int main_process(){
     // try open a stream socket
     if((fd_socket = socket(PF_INET, SOCK_STREAM, 0)) < 0){
         fprintf(stderr, "[!](server) can't open stream socket\n");
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     // initialize addr_server
@@ -125,7 +125,7 @@ int main_process(){
     if(bind(fd_socket, (struct sockaddr *)&addr_server, sizeof(addr_server)) < 0){
         fprintf(stderr, "[!](server) can't bind local address\n");
         close(fd_socket);
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     // listen for connections on a socket
@@ -145,7 +145,7 @@ int main_process(){
             fprintf(stderr, "[!](server) accept failed\n");
             close(fd_client);
             close(fd_socket);
-            exit(EXIT_FAILURE);
+            return EXIT_FAILURE;
         }
 
         printf("[%s : %d] client was connected\n", buf, ntohs(addr_client.sin_port));
@@ -155,14 +155,14 @@ int main_process(){
         if(pid_child == -1){
             close(fd_client);
             close(fd_socket);
-            exit(EXIT_FAILURE);
+            return EXIT_FAILURE;
         } else if (pid_child == 0){
             // call the sub_process
             sub_process(path_log, path_cache, fd_client);
 
             printf("[%s : %d] client was disconnected\n", buf, ntohs(addr_client.sin_port));
             close(fd_client);
-            exit(EXIT_SUCCESS);
+            return EXIT_SUCCESS;
         }
         close(fd_client);
     }
