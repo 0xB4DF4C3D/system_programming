@@ -321,6 +321,7 @@ int insert_delim(char *str, size_t size_max, size_t idx, char delim){
  * @param header The header of a log message.
  * @param body The body of a log message.
  * @param time_ If it is true, write the log with current time. otherwise, don't.
+ * @param pid_ Append PID information into the log when it is set.
  * @return [int] Success:EXIT_SUCCESS, Fail:EXIT_FAILURE
  */
 int write_log(const char *path, const char *header, const char *body, bool time_, bool pid_){
