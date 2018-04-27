@@ -206,7 +206,7 @@ int sub_process(const char *path_log, const char *path_cache, int fd_client){
     // timer start
     time(&time_start);
 
-    // receive inputs till the input is 'bye'
+    // receive inputs till the input is 'bye' or client is connected
     while((len_out = read(fd_client, url_input, BUFSIZ)) > 0){
 
         if(!strncmp(url_input, "bye", 3)) break;
@@ -321,6 +321,7 @@ int insert_delim(char *str, size_t size_max, size_t idx, char delim){
  * @param header The header of a log message.
  * @param body The body of a log message.
  * @param time_ If it is true, write the log with current time. otherwise, don't.
+ * @param pid_ Append PID information into the log when it is set.
  * @return [int] Success:EXIT_SUCCESS, Fail:EXIT_FAILURE
  */
 int write_log(const char *path, const char *header, const char *body, bool time_, bool pid_){
