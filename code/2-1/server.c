@@ -206,7 +206,7 @@ int sub_process(const char *path_log, const char *path_cache, int fd_client){
     // timer start
     time(&time_start);
 
-    // receive inputs till the input is 'bye'
+    // receive inputs till the input is 'bye' or client is connected
     while((len_out = read(fd_client, url_input, BUFSIZ)) > 0){
 
         if(!strncmp(url_input, "bye", 3)) break;
