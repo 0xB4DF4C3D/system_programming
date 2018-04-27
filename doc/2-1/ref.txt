@@ -1,0 +1,32 @@
+https://kldp.org/node/37061
+clean up child process
+
+
+https://linux.die.net/man/3/read - If fildes refers to a socket, read() shall be equivalent to recv() with no flags set.
+https://linux.die.net/man/2/recv - The return value will be 0 when the peer has performed an orderly shutdown.
+어떻게 disconnect를 감지하는가
+
+https://stackoverflow.com/questions/15102992/what-is-the-difference-between-stdin-and-stdin-fileno
+STDIN_FILENO 과 stdin의 차이
+
+https://linux.die.net/man/3/inet_aton
+inet_addr이 -1을 반환하는 문제
+
+http://forums.devshed.com/programming-42/inet_pton-inet_aton-438155.html
+http://scratchnotesbymia.blogspot.kr/2009/08/inetntoa-vs-inetntop.html
+http://man7.org/linux/man-pages/man3/inet_pton.3.html
+inet_aton vs inet_pton
+이 둘을 따로 비교한 공식 문서를 찾지 못해 부득이하게 두 링크는 포럼과 블로그 글로 대체함.
+
+https://stackoverflow.com/questions/231912/what-is-the-difference-between-sigaction-and-signal
+https://www.joinc.co.kr/w/man/2/sigaction
+sigaction vs signal
+
+http://man7.org/linux/man-pages/man7/signal.7.html
+signal 종류
+
+https://kldp.org/node/79909
+^z ^d ^q등등의 의미
+
+http://docs.likejazz.com/time-wait/
+FINWAIT2, TIMEWAIT에 대해
