@@ -9,7 +9,7 @@
 
 #include "proxy_util.h"
 
-int sub_process(const char *path_cache, int fd_client, struct sockaddr_in addr_client);
+int sub_process(const char *path_cache, const char *path_log, int fd_client, struct sockaddr_in addr_client);
 int main_process();
 
 /**
@@ -57,6 +57,7 @@ int main_process(){
     // char arrays for handling paths
     char path_cache[PROXY_MAX_PATH] = {0};
     char path_home[PROXY_MAX_PATH]  = {0};
+    char path_log[PROXY_MAX_PATH] = {0};
 
     // a pid number of process
     pid_t pid_child = 0;
@@ -70,6 +71,7 @@ int main_process(){
         return EXIT_FAILURE;
     }
     snprintf(path_cache, PROXY_MAX_PATH, "%s/cache", path_home);
+    snprintf(path_log, PROXY_MAX_PATH, "%s/logfile/logfile.txt", path_home);
 
     // try open a stream socket
     if((fd_socket = socket(PF_INET, SOCK_STREAM, 0)) < 0){
@@ -118,7 +120,7 @@ int main_process(){
             return EXIT_FAILURE;
         } else if (pid_child == 0){
             // call the sub_process
-            sub_process(path_cache, fd_client, addr_client);
+            sub_process(path_cache, path_log, fd_client, addr_client);
 
             close(fd_client);
             return EXIT_SUCCESS;
@@ -135,30 +137,41 @@ int main_process(){
  * A subprocess running in a child process.
  * It handles caches practically.
  * @param path_cache The path containing primecaches.
+ * @param path_log The path containing a logfile
  * @param fd_client The client file descriptor.
  * @param addr_client The address struct for the client
  * @return [int] Success:EXIT_SUCCESS
  */
-int sub_process(const char *path_cache, int fd_client, struct sockaddr_in addr_client){
-
-    struct in_addr inet_addr_client; memset(&inet_addr_client, 0, sizeof(inet_addr_client));
+int sub_process(const char *path_cache, const char *path_log, int fd_client, struct sockaddr_in addr_client){
 
     char buf[BUFSIZ] = {0};
 
-    char response_header[BUFSIZ] = {0};
-    char response_message[BUFSIZ] = {0};
+    size_t count_hit  = 0;
+    size_t count_miss = 0;
+    
+    char hash_url[PROXY_LEN_HASH] = {0};
+    
+    struct in_addr inet_addr_client; memset(&inet_addr_client, 0, sizeof(inet_addr_client));
 
-    char tmp[BUFSIZ] = {0};
-    char method[20] = {0};
-    char url[PROXY_MAX_URL] = {0};
+    char parsed_tmp[BUFSIZ]        = {0};
+    char parsed_method[20]         = {0};
+    char parsed_url[PROXY_MAX_URL] = {0};
 
-    char url_hash[PROXY_LEN_HASH] = {0};
-
-    char *tok = NULL;
+    char path_fullcache[PROXY_MAX_PATH] = {0};
 
     int res = 0;
 
-    char path_fullcache[PROXY_MAX_PATH] = {0};
+    char response_header[BUFSIZ]  = {0};
+    char response_message[BUFSIZ] = {0};
+
+    time_t time_start = {0};
+    time_t time_end   = {0};
+
+    char *tok = NULL;
+
+    // timer start
+    time(&time_start);
+
 
     inet_addr_client.s_addr = addr_client.sin_addr.s_addr;
 
@@ -170,29 +183,35 @@ int sub_process(const char *path_cache, int fd_client, struct sockaddr_in addr_c
     printf("Request from [%s : %d]\n", inet_ntoa(inet_addr_client), ntohs(addr_client.sin_port));
     puts(buf);
 
-    parse_request(buf, url, method); 
+    parse_request(buf, parsed_url, parsed_method); 
 
     // hash the input URL and find the cache with it
-    sha1_hash(url, url_hash);
-    res = find_primecache(path_cache, url_hash);
+    sha1_hash(parsed_url, hash_url);
+    res = find_primecache(path_cache, hash_url);
 
     // insert a slash delimiter at the 3rd index in the url_hash
-    insert_delim(url_hash, PROXY_MAX_URL, 3, '/');
+    insert_delim(hash_url, PROXY_MAX_URL, 3, '/');
 
     // make a path for fullcache
-    snprintf(path_fullcache, PROXY_MAX_PATH ,"%s/%s", path_cache, url_hash);
+    snprintf(path_fullcache, PROXY_MAX_PATH ,"%s/%s", path_cache, hash_url);
 
     switch(res){
         // If the result is HIT case,
         case PROXY_HIT:
+            count_hit += 1;
+            write_log(path_log, "[HIT]", hash_url, true, true);
+            write_log(path_log, "[HIT]", parsed_url, false, false);
 
             strncpy(response_message, "Hit", BUFSIZ);
             break;
 
             // If the result is MISS case,
         case PROXY_MISS:
+            count_miss += 1;
+            write_log(path_fullcache, "[TEST]", parsed_url, true, false);
+            write_log(path_log, "[MISS]", parsed_url, true, true);
 
-            write_log(path_fullcache, "[TEST]", url, true, false); 
+            write_log(path_fullcache, "[TEST]", parsed_url, true, false); 
             strncpy(response_message, "Miss", BUFSIZ);
             break;
 
@@ -211,6 +230,13 @@ int sub_process(const char *path_cache, int fd_client, struct sockaddr_in addr_c
 
     printf("[%s : %d] client was disconnected\n", inet_ntoa(inet_addr_client), ntohs(addr_client.sin_port));
     puts("======================================================\n");
+
+    // timer end
+    time(&time_end);
+
+    // make a string for terminating the log and write it
+    snprintf(buf, BUFSIZ, "run time: %d sec. #request hit : %lu, miss : %lu", (int)difftime(time_end, time_start), count_hit, count_miss);
+    write_log(path_log, "[Terminated]", buf, false, true);
 
     return EXIT_SUCCESS;
 }
