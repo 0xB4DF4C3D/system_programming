@@ -147,7 +147,7 @@ int sub_process(const char *path_cache, const char *path_log, int fd_client, str
     // a buffer for containing request header
     char buf[BUFSIZ] = {0};
 
-    // counts for hit&miss
+    // counters for hit&miss
     size_t count_hit  = 0;
     size_t count_miss = 0;
     
