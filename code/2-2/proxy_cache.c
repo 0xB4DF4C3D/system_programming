@@ -144,30 +144,36 @@ int main_process(){
  */
 int sub_process(const char *path_cache, const char *path_log, int fd_client, struct sockaddr_in addr_client){
 
+    // a buffer for containing request header
     char buf[BUFSIZ] = {0};
 
+    // counts for hit&miss
     size_t count_hit  = 0;
     size_t count_miss = 0;
     
+    // hash for url
     char hash_url[PROXY_LEN_HASH] = {0};
     
+    // in_addr structure for checking ip address
     struct in_addr inet_addr_client; memset(&inet_addr_client, 0, sizeof(inet_addr_client));
 
-    char parsed_tmp[BUFSIZ]        = {0};
+    // char arrays to be contained with parsed results
     char parsed_method[20]         = {0};
     char parsed_url[PROXY_MAX_URL] = {0};
 
+    // a char array pointing full cache path
     char path_fullcache[PROXY_MAX_PATH] = {0};
 
+    // result value for finding cache
     int res = 0;
 
+    // char arrays for containing response information
     char response_header[BUFSIZ]  = {0};
     char response_message[BUFSIZ] = {0};
 
+    // timer variables
     time_t time_start = {0};
     time_t time_end   = {0};
-
-    char *tok = NULL;
 
     // timer start
     time(&time_start);
