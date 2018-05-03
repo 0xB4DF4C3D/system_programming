@@ -239,7 +239,7 @@ int find_primecache(const char *path_primecache, const char *hash_full){
  * Parse a request from a client.
  * @param buf A buffer containing request
  * @param method A char array to contain extracted method
- * @param url A char array to contain extracted url, it'll be NULL when method isn't GET
+ * @param url A char array to contain extracted url, it'll be "NULL" when method isn't GET
  * @return [int] SUCCESS:EXIT_SUCCESS
  */
 int parse_request(const char *buf, char *url, char *method){
@@ -259,8 +259,8 @@ int parse_request(const char *buf, char *url, char *method){
     if(strcmp(method, "GET") == 0){
         tok = strtok(NULL, " ");
         strcpy(url, tok);
-    } else { // else then url be NULL
-        url = NULL;
+    } else { // else then url be "NULL"
+        strcpy(url, "NULL");
     }
 
     return EXIT_SUCCESS;
