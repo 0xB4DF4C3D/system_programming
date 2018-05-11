@@ -15,6 +15,7 @@
 #include <fcntl.h>       // file control options
 #include <libgen.h>      // definitions for pattern matching functions
 #include <pwd.h>         // password structure
+#include <netdb.h>
 #include <signal.h>
 #include <stdbool.h>     // for boolean type
 #include <stdio.h>
@@ -42,7 +43,8 @@ typedef enum {
     PROXY_HIT  = 8000, ///< An arbitrary magic number for the HIT case.
     PROXY_MISS = 8001, ///< An arbitrary magic number for the MISS case.
 
-    PROXY_PORTNO = 38078 ///< A given port number for me.
+    PROXY_PORTNO = 38078,  ///< A given port number for me.
+    PROXY_HTTP_PORTNO = 80 ///< The port number for HTTP
 } Proxy_constants;
 
 char *getHomeDir(char *home);
@@ -51,4 +53,6 @@ int insert_delim(char *str, size_t size_max, size_t idx, char delim);
 int write_log(const char *path, const char *header, const char *body, bool time_, bool pid_);
 int find_subcache(const char *path_subcache, const char *hash_full);
 int find_primecache(const char *path_primecache, const char *hash_full);
-int parse_request(const char *buf, char *url, char *method);
+int parse_request(const char *buf, char *url);
+int request_dump(const char *buf, const char *url, const char *filepath);
+char *getIPAddr(const char *addr);

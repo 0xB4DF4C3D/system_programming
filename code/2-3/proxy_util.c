@@ -238,30 +238,98 @@ int find_primecache(const char *path_primecache, const char *hash_full){
 /**
  * Parse a request from a client.
  * @param buf A buffer containing request
- * @param method A char array to contain extracted method
  * @param url A char array to contain extracted url, it'll be "NULL" when method isn't GET
- * @return [int] SUCCESS:EXIT_SUCCESS
+ * @return [int] SUCCESS:EXIT_SUCCESS, FAIL:EXIT_FAILURE
  */
-int parse_request(const char *buf, char *url, char *method){
+int parse_request(const char *buf, char *url){
+
 
     // temporary vars for parsing
     char tmp[BUFSIZ] = {0};
     char *tok        = NULL;
+    char hostname[BUFSIZ] = {0}; 
 
     // copy contents of origin
     strncpy(tmp, buf, BUFSIZ);
 
     // extract a method part
     tok = strtok(tmp, " ");
-    strcpy(method, tok);
 
     // if the method is GET then extract an url part
-    if(strcmp(method, "GET") == 0){
+    if(strcmp(tok, "GET") == 0){
         tok = strtok(NULL, " ");
         strcpy(url, tok);
+
+
+
     } else { // else then url be "NULL"
         strcpy(url, "NULL");
     }
 
     return EXIT_SUCCESS;
+}
+/**
+ * Return IP address of host name.
+ * @param addr The URL of the host
+ * @return [char *] SUCCESS:statically allocated char array ,FAIL:NULL
+ */
+char *getIPAddr(const char *addr){
+    char *haddr          = NULL;
+    int len              = strlen(addr);
+    struct hostent *hent = NULL;
+
+    if((hent = (struct hostent*)gethostbyname(addr)) != NULL){
+        haddr = inet_ntoa(*((struct in_addr *)hent->h_addr_list[0]));
+    }
+
+    // The string is returned in a statically allocated buffer, 
+    // which subsequent calls will overwrite.
+    return haddr;
+}
+
+/**
+ * Request to the url, and write the result into the filepath
+ * @param buf A buffer containing response
+ * @param url A char array containing the url
+ * @param filepath A char array containing the filepath
+ * @return [int] SUCCESS:EXIT_SUCCESS, FAIL:EXIT_FAILURE
+ */
+int request_dump(const char *buf, const char *url, const char *filepath){
+    struct sockaddr_in addr_server = {0};
+    int fd_socket = 0;
+    int fd_cache = 0;
+    int len = 0;
+
+    int fd = 0;
+
+    char tmp[BUFSIZ] = {0};
+
+    fd = open(filepath, O_CREAT | O_TRUNC | O_WRONLY);
+
+    if((fd_socket = socket(PF_INET, SOCK_STREAM, 0)) < 0){
+        close(fd_socket);
+        return EXIT_FAILURE;
+    }
+
+    addr_server.sin_family = AF_INET;
+    addr_server.sin_addr.s_addr = inet_addr(getIPAddr(url)); 
+    addr_server.sin_port = htons(PROXY_HTTP_PORTNO);
+
+    if(connect(fd_socket, (struct sockaddr *)&addr_server, sizeof(addr_server)) < 0){
+        close(fd_socket);
+        return EXIT_FAILURE;
+    }
+
+    write(fd_socket, buf, strlen(buf));
+    printf("%s\n", buf);
+
+
+    while((len = read(fd_socket, tmp, sizeof(tmp))) > 0){
+        write(STDOUT_FILENO, tmp, len);
+        write(fd_cache, tmp, len);
+    }
+
+    close(fd_socket);
+    close(fd_cache);
+    close(fd);
 }

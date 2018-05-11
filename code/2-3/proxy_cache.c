@@ -50,7 +50,7 @@ int main_process(){
     int fd_socket = 0, fd_client = 0;
 
     socklen_t len = 0;
-    
+
     // an option value for socket
     int opt = 1;
 
@@ -150,15 +150,14 @@ int sub_process(const char *path_cache, const char *path_log, int fd_client, str
     // counters for hit&miss
     size_t count_hit  = 0;
     size_t count_miss = 0;
-    
+
     // hash for url
     char hash_url[PROXY_LEN_HASH] = {0};
-    
+
     // in_addr structure for checking ip address
     struct in_addr inet_addr_client; memset(&inet_addr_client, 0, sizeof(inet_addr_client));
 
     // char arrays to be contained with parsed results
-    char parsed_method[20]         = {0};
     char parsed_url[PROXY_MAX_URL] = {0};
 
     // a char array pointing full cache path
@@ -175,21 +174,26 @@ int sub_process(const char *path_cache, const char *path_log, int fd_client, str
     time_t time_start = {0};
     time_t time_end   = {0};
 
+    char response[BUFSIZ] = {0};
+
+    int fd_cache = 0;
+    int len = 0;
+
     // timer start
     time(&time_start);
 
 
     inet_addr_client.s_addr = addr_client.sin_addr.s_addr;
 
-    puts("======================================================");
-    printf("[%s : %d] client was connected\n", inet_ntoa(inet_addr_client), ntohs(addr_client.sin_port));
+    // puts("======================================================");
+    // printf("[%s : %d] client was connected\n", inet_ntoa(inet_addr_client), ntohs(addr_client.sin_port));
 
     read(fd_client, buf, BUFSIZ);
 
-    printf("Request from [%s : %d]\n", inet_ntoa(inet_addr_client), ntohs(addr_client.sin_port));
-    puts(buf);
+    // printf("Request from [%s : %d]\n", inet_ntoa(inet_addr_client), ntohs(addr_client.sin_port));
+    // puts(buf);
 
-    parse_request(buf, parsed_url, parsed_method); 
+    parse_request(buf, parsed_url); 
 
     // hash the input URL and find the cache with it
     sha1_hash(parsed_url, hash_url);
@@ -209,15 +213,19 @@ int sub_process(const char *path_cache, const char *path_log, int fd_client, str
             write_log(path_log, "[HIT]", parsed_url, false, false);
 
             strncpy(response_message, "Hit", BUFSIZ);
+            
+            fd_cache = open(path_fullcache, O_RDONLY, 0777);
+            while((len = read(fd_cache, response, sizeof(response))) > 0){
+                write(fd_client, response, len);
+            }
+            close(fd_cache);
             break;
 
             // If the result is MISS case,
         case PROXY_MISS:
             count_miss += 1;
-            write_log(path_fullcache, "[TEST]", parsed_url, true, false);
             write_log(path_log, "[MISS]", parsed_url, true, true);
 
-            write_log(path_fullcache, "[TEST]", parsed_url, true, false); 
             strncpy(response_message, "Miss", BUFSIZ);
             break;
 
@@ -234,8 +242,8 @@ int sub_process(const char *path_cache, const char *path_log, int fd_client, str
     write(fd_client, response_header, strlen(response_header));
     write(fd_client, response_message, strlen(response_message));
 
-    printf("[%s : %d] client was disconnected\n", inet_ntoa(inet_addr_client), ntohs(addr_client.sin_port));
-    puts("======================================================\n");
+    // printf("[%s : %d] client was disconnected\n", inet_ntoa(inet_addr_client), ntohs(addr_client.sin_port));
+    // puts("======================================================\n");
 
     // timer end
     time(&time_end);
