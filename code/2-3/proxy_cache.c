@@ -208,7 +208,7 @@ int sub_process(const char *path_cache, const char *path_log, int fd_client, str
     int fd_cache = 0;
     int len      = 0;
 
-    // prevent duplicate terminated log
+    // prevent duplicated terminated log
     signal(SIGINT, SIG_DFL);
 
     // intercept a request from the client 
