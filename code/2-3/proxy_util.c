@@ -341,4 +341,6 @@ int request_dump(const char *buf, const char *url, const char *filepath){
     // close file descriptors
     close(fd_socket);
     close(fd_cache);
+
+    return EXIT_SUCCESS;
 }
