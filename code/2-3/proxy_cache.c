@@ -237,7 +237,7 @@ int sub_process(const char *path_cache, const char *path_log, int fd_client, str
 
             // if the result is MISS case,
         case PROXY_MISS:
-            // set the time for timeout
+            // set the timer for timeout
             alarm(10);
 
             // request to the url and save its response into path_fullcache
