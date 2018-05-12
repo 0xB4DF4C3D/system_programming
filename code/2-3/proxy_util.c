@@ -115,7 +115,7 @@ int write_log(const char *path, const char *header, const char *body, bool time_
         // then time_str has format as belows
         time(&now);
         ltp = localtime(&now);
-        strftime(str_time, 32, " - [%Y/%m/%d, %T]", ltp);
+        strftime(str_time, 32, "-[%Y/%m/%d, %T]", ltp);
     }
 
     // if pid flag is true
@@ -243,11 +243,9 @@ int find_primecache(const char *path_primecache, const char *hash_full){
  */
 int parse_request(const char *buf, char *url){
 
-
     // temporary vars for parsing
     char tmp[BUFSIZ] = {0};
     char *tok        = NULL;
-    char hostname[BUFSIZ] = {0}; 
 
     // copy contents of origin
     strncpy(tmp, buf, BUFSIZ);
@@ -259,9 +257,6 @@ int parse_request(const char *buf, char *url){
     if(strcmp(tok, "GET") == 0){
         tok = strtok(NULL, " ");
         strcpy(url, tok);
-
-
-
     } else { // else then url be "NULL"
         strcpy(url, "NULL");
     }
@@ -295,41 +290,54 @@ char *getIPAddr(const char *addr){
  * @return [int] SUCCESS:EXIT_SUCCESS, FAIL:EXIT_FAILURE
  */
 int request_dump(const char *buf, const char *url, const char *filepath){
+
+    // variables for requesting to the url
     struct sockaddr_in addr_server = {0};
     int fd_socket = 0;
+
+    // a file descriptor for writing response content
     int fd_cache = 0;
     int len = 0;
 
-    int fd = 0;
-
+    // temporary buffers
     char tmp[BUFSIZ] = {0};
+    char *tok = NULL;
 
-    fd = open(filepath, O_CREAT | O_TRUNC | O_WRONLY);
+    // get a file descriptor at filepath to write with full permission
+    fd_cache = open(filepath, O_CREAT | O_TRUNC | O_WRONLY, 0777);
 
+    // open a socket as TCP
     if((fd_socket = socket(PF_INET, SOCK_STREAM, 0)) < 0){
         close(fd_socket);
         return EXIT_FAILURE;
     }
 
-    addr_server.sin_family = AF_INET;
-    addr_server.sin_addr.s_addr = inet_addr(getIPAddr(url)); 
-    addr_server.sin_port = htons(PROXY_HTTP_PORTNO);
+    // equivalent to extract hostname
+    strncpy(tmp, url, BUFSIZ);
+    tok = strtok(tmp, "/");
+    tok = strtok(NULL, "/");
 
-    if(connect(fd_socket, (struct sockaddr *)&addr_server, sizeof(addr_server)) < 0){
-        close(fd_socket);
-        return EXIT_FAILURE;
+    if(tok != NULL){
+        // initialize addr_server
+        addr_server.sin_family = AF_INET;
+        addr_server.sin_addr.s_addr = inet_addr(getIPAddr(tok)); 
+        addr_server.sin_port = htons(PROXY_HTTP_PORTNO);
+
+        // connect fd_socket to addr_server
+        if(connect(fd_socket, (struct sockaddr *)&addr_server, sizeof(addr_server)) < 0){
+            close(fd_socket);
+            return EXIT_FAILURE;
+        }
+
+        // send the buf which is request message
+        write(fd_socket, buf, strlen(buf));
+
+        // read the response and write it into fd_cache
+        while((len = read(fd_socket, tmp, sizeof(tmp))) > 0){
+            write(fd_cache, tmp, len);
+        }
     }
-
-    write(fd_socket, buf, strlen(buf));
-    printf("%s\n", buf);
-
-
-    while((len = read(fd_socket, tmp, sizeof(tmp))) > 0){
-        write(STDOUT_FILENO, tmp, len);
-        write(fd_cache, tmp, len);
-    }
-
+    // close file descriptors
     close(fd_socket);
     close(fd_cache);
-    close(fd);
 }

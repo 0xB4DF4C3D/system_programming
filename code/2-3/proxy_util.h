@@ -7,6 +7,8 @@
  * @date Thu May 10 14:04:12 KST 2018
  */
 
+// To use sigaction
+
 #include <openssl/sha.h> // to use SHA1
 #include <arpa/inet.h>   // for socket programming 
 
@@ -43,7 +45,7 @@ typedef enum {
     PROXY_HIT  = 8000, ///< An arbitrary magic number for the HIT case.
     PROXY_MISS = 8001, ///< An arbitrary magic number for the MISS case.
 
-    PROXY_PORTNO = 38078,  ///< A given port number for me.
+    PROXY_PORTNO      = 38078,  ///< A given port number for me.
     PROXY_HTTP_PORTNO = 80 ///< The port number for HTTP
 } Proxy_constants;
 

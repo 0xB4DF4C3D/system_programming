@@ -12,11 +12,48 @@
 int sub_process(const char *path_cache, const char *path_log, int fd_client, struct sockaddr_in addr_client);
 int main_process();
 
+// time variables
+time_t time_start = {0};
+time_t time_end   = {0};
+
+// counter for number of subprocesses
+size_t count_subprocess = 0;
+
 /**
  * A handler for handling the SIGCHLD signal.
  */
 void handler_child(){
     while(waitpid(-1, NULL, WNOHANG) > 0); // clean up child processes
+}
+
+/**
+ * A handler for handling the SIGALRM signal to solve timeout.
+ */
+void handler_alram(){
+    printf("No Response\n");
+    abort();
+}
+
+/**
+ * A handler for handling the SIGINT signal to write terminated log.
+ */
+void handler_int(){
+    
+    char buf[BUFSIZ] = {0};
+
+    // get log path
+    char path_log[PROXY_MAX_PATH] = {0};
+    getHomeDir(path_log);
+    strncat(path_log, "/logfile/logfile.txt", PROXY_MAX_PATH);
+
+    // timer end
+    time(&time_end);
+
+    // make a string for terminating the log and write it
+    snprintf(buf, BUFSIZ, "run time: %d sec. #sub process: %lu", (int)difftime(time_end, time_start), count_subprocess); 
+    write_log(path_log, "**SERVER** [Terminated]", buf, false, false);
+
+    exit(EXIT_SUCCESS);
 }
 
 int main(int argc, char* argv[]){
@@ -43,9 +80,6 @@ int main_process(){
     // temporary buffer for misc
     char buf[BUFSIZ] = {0};
 
-    // counter for number of subprocesses
-    size_t count_subprocess = 0;
-
     // file descriptors
     int fd_socket = 0, fd_client = 0;
 
@@ -61,6 +95,9 @@ int main_process(){
 
     // a pid number of process
     pid_t pid_child = 0;
+
+    // timer start
+    time(&time_start);
 
     // set full permission for the current process
     umask(0);
@@ -95,8 +132,10 @@ int main_process(){
     // listen for connections on a socket
     listen(fd_socket, 5);
 
-    // call handler_child when SIGCHLD occurs
+    // call an appropriate handler when corresponding occurs
     signal(SIGCHLD, handler_child);
+    signal(SIGALRM, handler_alram);
+    signal(SIGINT, handler_int);
 
     // interact with the client
     while(true){
@@ -105,6 +144,7 @@ int main_process(){
         addr_len = sizeof(addr_client);
         fd_client = accept(fd_socket, (struct sockaddr *)&addr_client, &addr_len); 
         inet_ntop(AF_INET, &addr_client.sin_addr, buf, addr_len);
+
         if(fd_client < 0){
             fprintf(stderr, "[!](server) accept failed\n");
             close(fd_client);
@@ -125,6 +165,8 @@ int main_process(){
             close(fd_client);
             return EXIT_SUCCESS;
         }
+        count_subprocess += 1;
+
         // in a parent process
         close(fd_client);
     }
@@ -147,15 +189,8 @@ int sub_process(const char *path_cache, const char *path_log, int fd_client, str
     // a buffer for containing request header
     char buf[BUFSIZ] = {0};
 
-    // counters for hit&miss
-    size_t count_hit  = 0;
-    size_t count_miss = 0;
-
     // hash for url
     char hash_url[PROXY_LEN_HASH] = {0};
-
-    // in_addr structure for checking ip address
-    struct in_addr inet_addr_client; memset(&inet_addr_client, 0, sizeof(inet_addr_client));
 
     // char arrays to be contained with parsed results
     char parsed_url[PROXY_MAX_URL] = {0};
@@ -166,34 +201,21 @@ int sub_process(const char *path_cache, const char *path_log, int fd_client, str
     // result value for finding cache
     int res = 0;
 
-    // char arrays for containing response information
-    char response_header[BUFSIZ]  = {0};
-    char response_message[BUFSIZ] = {0};
-
-    // timer variables
-    time_t time_start = {0};
-    time_t time_end   = {0};
-
+    // a char array for containing response information
     char response[BUFSIZ] = {0};
 
+    // a file descriptor for reading a cache file
     int fd_cache = 0;
-    int len = 0;
+    int len      = 0;
 
-    // timer start
-    time(&time_start);
+    // prevent duplicate terminated log
+    signal(SIGINT, SIG_DFL);
 
-
-    inet_addr_client.s_addr = addr_client.sin_addr.s_addr;
-
-    // puts("======================================================");
-    // printf("[%s : %d] client was connected\n", inet_ntoa(inet_addr_client), ntohs(addr_client.sin_port));
-
+    // intercept a request from the client 
     read(fd_client, buf, BUFSIZ);
 
-    // printf("Request from [%s : %d]\n", inet_ntoa(inet_addr_client), ntohs(addr_client.sin_port));
-    // puts(buf);
-
-    parse_request(buf, parsed_url); 
+    // extract the url part from buf that was intercepted earlier
+    parse_request(buf, parsed_url);
 
     // hash the input URL and find the cache with it
     sha1_hash(parsed_url, hash_url);
@@ -206,51 +228,36 @@ int sub_process(const char *path_cache, const char *path_log, int fd_client, str
     snprintf(path_fullcache, PROXY_MAX_PATH ,"%s/%s", path_cache, hash_url);
 
     switch(res){
-        // If the result is HIT case,
+        // if the result is HIT case,
         case PROXY_HIT:
-            count_hit += 1;
-            write_log(path_log, "[HIT]", hash_url, true, true);
+            // nothing to do, just log it
+            write_log(path_log, "[HIT]", hash_url, true, false);
             write_log(path_log, "[HIT]", parsed_url, false, false);
-
-            strncpy(response_message, "Hit", BUFSIZ);
-            
-            fd_cache = open(path_fullcache, O_RDONLY, 0777);
-            while((len = read(fd_cache, response, sizeof(response))) > 0){
-                write(fd_client, response, len);
-            }
-            close(fd_cache);
             break;
 
-            // If the result is MISS case,
+            // if the result is MISS case,
         case PROXY_MISS:
-            count_miss += 1;
-            write_log(path_log, "[MISS]", parsed_url, true, true);
+            // set the time for timeout
+            alarm(10);
 
-            strncpy(response_message, "Miss", BUFSIZ);
+            // request to the url and save its response into path_fullcache
+            request_dump(buf, parsed_url, path_fullcache);
+
+            // log it
+            write_log(path_log, "[MISS]", parsed_url, true, false);
             break;
 
         default:
             break;
     }
 
-    snprintf(response_header, BUFSIZ,
-            "HTTP/1.0 200 OK\r\n"
-            "Server:2018 simple web server\r\n"
-            "Content-length:%lu\r\n"
-            "Content-type:text/html\r\n\r\n", strlen(response_message));
-
-    write(fd_client, response_header, strlen(response_header));
-    write(fd_client, response_message, strlen(response_message));
-
-    // printf("[%s : %d] client was disconnected\n", inet_ntoa(inet_addr_client), ntohs(addr_client.sin_port));
-    // puts("======================================================\n");
-
-    // timer end
-    time(&time_end);
-
-    // make a string for terminating the log and write it
-    snprintf(buf, BUFSIZ, "run time: %d sec. #request hit : %lu, miss : %lu", (int)difftime(time_end, time_start), count_hit, count_miss);
-    write_log(path_log, "[Terminated]", buf, false, true);
+    // read from the cache whether it is HIT or MISS
+    fd_cache = open(path_fullcache, O_RDONLY);
+    while((len = read(fd_cache, response, sizeof(response))) > 0){
+        // and send its content to the client
+        write(fd_client, response, len);
+    }
+    close(fd_cache);
 
     return EXIT_SUCCESS;
 }
