@@ -236,12 +236,12 @@ int find_primecache(const char *path_primecache, const char *hash_full){
 }
 
 /**
- * Parse a request from a client.
+ * Parse a request from a client to extract the url.
  * @param buf A buffer containing request
  * @param url A char array to contain extracted url, it'll be "NULL" when method isn't GET
  * @return [int] SUCCESS:EXIT_SUCCESS, FAIL:EXIT_FAILURE
  */
-int parse_request(const char *buf, char *url){
+int request_parse(const char *buf, char *url){
 
     // temporary vars for parsing
     char tmp[BUFSIZ] = {0};
@@ -263,6 +263,7 @@ int parse_request(const char *buf, char *url){
 
     return EXIT_SUCCESS;
 }
+
 /**
  * Return IP address of host name.
  * @param addr The URL of the host

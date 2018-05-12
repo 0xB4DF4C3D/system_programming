@@ -215,7 +215,7 @@ int sub_process(const char *path_cache, const char *path_log, int fd_client, str
     read(fd_client, buf, BUFSIZ);
 
     // extract the url part from buf that was intercepted earlier
-    parse_request(buf, parsed_url);
+    request_parse(buf, parsed_url);
 
     // hash the input URL and find the cache with it
     sha1_hash(parsed_url, hash_url);

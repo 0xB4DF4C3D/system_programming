@@ -55,6 +55,6 @@ int insert_delim(char *str, size_t size_max, size_t idx, char delim);
 int write_log(const char *path, const char *header, const char *body, bool time_, bool pid_);
 int find_subcache(const char *path_subcache, const char *hash_full);
 int find_primecache(const char *path_primecache, const char *hash_full);
-int parse_request(const char *buf, char *url);
+int request_parse(const char *buf, char *url);
 int request_dump(const char *buf, const char *url, const char *filepath);
 char *getIPAddr(const char *addr);
