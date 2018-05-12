@@ -235,7 +235,7 @@ int sub_process(const char *path_cache, const char *path_log, int fd_client, str
             write_log(path_log, "[HIT]", parsed_url, false, false);
             break;
 
-            // if the result is MISS case,
+        // if the result is MISS case,
         case PROXY_MISS:
             // set the timer for timeout
             alarm(10);
