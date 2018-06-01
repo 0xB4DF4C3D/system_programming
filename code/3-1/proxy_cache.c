@@ -1,20 +1,23 @@
 /**
- * System Programming Assignment #2-3 (proxy server)
+ * System Programming Assignment #3-1 (proxy server)
  * @file proxy_cache.c
  * @author name       : Jung Dong Ho
  * @n      email      : dongho971220@gmail.com
  * @n      student id : 2016722092
- * @date Thu May 10 14:03:03 KST 2018
+ * @date Thu May 31 12:14:38 KST 2018
  */
 
 #include "proxy_util.h"
 
-int sub_process(const char *path_cache, const char *path_log, int fd_client, struct sockaddr_in addr_client);
+int sub_process(const char *path_cache, const char *path_log, int fd_client,
+                struct sockaddr_in addr_client);
 int main_process();
 
 // time variables
 time_t time_start = {0};
 time_t time_end   = {0};
+
+int semid = 0;
 
 // counter for number of subprocesses
 size_t count_subprocess = 0;
@@ -184,7 +187,8 @@ int main_process(){
  * @param addr_client The address struct for the client
  * @return [int] Success:EXIT_SUCCESS
  */
-int sub_process(const char *path_cache, const char *path_log, int fd_client, struct sockaddr_in addr_client){
+int sub_process(const char *path_cache, const char *path_log, int fd_client,
+                struct sockaddr_in addr_client){
 
     // a buffer for containing request header
     char buf[BUFSIZ] = {0};
@@ -217,6 +221,10 @@ int sub_process(const char *path_cache, const char *path_log, int fd_client, str
     // extract the url part from buf that was intercepted earlier
     request_parse(buf, parsed_url);
 
+    if(parsed_url == NULL){ // if the request is not GET method then parsed_url'll be NULL
+        return EXIT_SUCCESS;
+    }
+
     // hash the input URL and find the cache with it
     sha1_hash(parsed_url, hash_url);
     res = find_primecache(path_cache, hash_url);
@@ -242,7 +250,6 @@ int sub_process(const char *path_cache, const char *path_log, int fd_client, str
 
             // request to the url and save its response into path_fullcache
             request_dump(buf, parsed_url, path_fullcache);
-
             // log it
             write_log(path_log, "[MISS]", parsed_url, true, false);
             break;

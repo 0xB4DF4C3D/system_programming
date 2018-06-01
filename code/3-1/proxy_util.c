@@ -1,10 +1,10 @@
 /**
- * System Programming Assignment #2-3 (proxy server)
+ * System Programming Assignment #3-1 (proxy server)
  * @file proxy_util.c
  * @author name       : Jung Dong Ho
  * @n      email      : dongho971220@gmail.com
  * @n      student id : 2016722092
- * @date Thu May 10 14:03:41 KST 2018
+ * @date Thu May 31 12:15:41 KST 2018
  */
 
 #include "proxy_util.h"
@@ -96,6 +96,23 @@ int write_log(const char *path, const char *header, const char *body, bool time_
     struct tm *ltp = NULL; // for local time
     time_t now = {0};
 
+    sem_t *sem_id = NULL;
+    char sem_key_str[32] = {0};
+    
+    // get semaphore id with given port number
+    snprintf(sem_key_str, 32, "%d", PROXY_PORTNO);
+    if((sem_id = sem_open(sem_key_str, O_CREAT, 0777, 1)) == NULL){
+        fprintf(stderr, "[!] sem_open error\n");
+        return EXIT_FAILURE;
+    }
+
+    // wait other processes corresponding to the sem_id
+    printf("*PID# %d is waiting for the semaphore.\n", pid_current);
+    sem_wait(sem_id);
+    printf("*PID# %d is in the critical zone.\n", pid_current);
+
+    sleep(1); // for checking with eyes
+
     // try opening the path with the append mode
     fp = fopen(path, "a+");
     if(fp == NULL){ // when the try went fail
@@ -106,6 +123,7 @@ int write_log(const char *path, const char *header, const char *body, bool time_
             fp = fopen(path, "a+");
         } else {
             fprintf(stderr, "[!] %s : %s\n", path, strerror(errno));
+            sem_post(sem_id);
             return EXIT_FAILURE;
         }
     }
@@ -138,11 +156,14 @@ int write_log(const char *path, const char *header, const char *body, bool time_
 
         fclose(fp);
         free(msg_total);
+        sem_post(sem_id);
         return EXIT_FAILURE;
     }
 
     fclose(fp);
     free(msg_total);
+    sem_post(sem_id);
+    printf("*PID# %d is exited critical zone.\n", pid_current);
     return EXIT_SUCCESS;
 }
 
@@ -257,8 +278,8 @@ int request_parse(const char *buf, char *url){
     if(strcmp(tok, "GET") == 0){
         tok = strtok(NULL, " ");
         strcpy(url, tok);
-    } else { // else then url be "NULL"
-        strcpy(url, "NULL");
+    } else { // else then url be NULL
+        url = NULL;
     }
 
     return EXIT_SUCCESS;
