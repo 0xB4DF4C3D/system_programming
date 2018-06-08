@@ -1,5 +1,5 @@
 /**
- * System Programming Assignment #3-1 (proxy server)
+ * System Programming Assignment #3-2 (proxy server)
  * @file proxy_cache.c
  * @author name       : Jung Dong Ho
  * @n      email      : dongho971220@gmail.com
